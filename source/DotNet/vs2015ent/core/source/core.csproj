@@ -7,7 +7,7 @@
     <ProjectGuid>{05A7D929-1EE5-4516-AD4D-CC683788F8EB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ereadian.dbdocgen.core</RootNamespace>
+    <RootNamespace>Ereadian.DatabaseDocumentGenerator.Core</RootNamespace>
     <AssemblyName>ereadian.dbdocgen.core</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -40,19 +40,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\shared\core\IColumn.cs">
+    <Compile Include="..\..\..\shared\core\source\DataSizeType.cs">
+      <Link>DataSizeType.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\IColumn.cs">
       <Link>IColumn.cs</Link>
     </Compile>
-    <Compile Include="..\..\shared\core\IDataType.cs">
+    <Compile Include="..\..\..\shared\core\source\IDataSize.cs">
+      <Link>IDataSize.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\IDataType.cs">
       <Link>IDataType.cs</Link>
     </Compile>
-    <Compile Include="..\..\shared\core\ITable.cs">
+    <Compile Include="..\..\..\shared\core\source\ITable.cs">
       <Link>ITable.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="entities\" />
+    <EmbeddedResource Include="..\..\..\shared\core\source\types.xml">
+      <Link>types.xml</Link>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

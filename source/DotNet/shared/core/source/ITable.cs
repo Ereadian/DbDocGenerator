@@ -1,14 +1,15 @@
 ﻿//------------------------------------------------------------------------------------------------------------------------------------------ 
-// <copyright file="IColumn.cs" company="Ereadian"> 
+// <copyright file="ITable.cs" company="Ereadian"> 
 //     Copyright (c) Ereadian.  All rights reserved. 
 // </copyright> 
 //------------------------------------------------------------------------------------------------------------------------------------------ 
 
-namespace ereadian.dbdocgen.core
+namespace Ereadian.DatabaseDocumentGenerator.Core
 {
-    public interface IColumn
+    /// <summary>
+    /// Table definition interface
+    /// </summary>
+    public interface ITable
     {
-        ITable Table { get; set; }
-        string Name { get; set; }
     }
 }
