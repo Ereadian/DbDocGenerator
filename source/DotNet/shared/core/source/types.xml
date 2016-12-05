@@ -1,6 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <types>
-  <section name="">
-    <type name="int" />
-  </section>
+  <provider name="MS SQL">
+    <type name="INT" />
+    <type name="BIGINT" />
+    <type name="UNIQUEIDENTIFIER" />
+    <type name="CHAR" size="required" />
+    <type name="NCHAR" size="required" />
+    <type name="VARCHAR" size="maximum"/>
+    <type name="NVARCHAR" size="maximum"/>
+    <type name="DATE" />
+    <type name="DATETIME" />
+    <type name="DATETIME2" />
+    <type name="XML" />
+  </provider>
 </types>

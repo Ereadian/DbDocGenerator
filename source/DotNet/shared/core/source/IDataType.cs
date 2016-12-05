@@ -12,13 +12,13 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
     public interface IDataType
     {
         /// <summary>
-        /// Gets or sets data type name
+        /// Gets data type name
         /// </summary>
         string TypeName { get; }
 
         /// <summary>
         /// Gets data size type
         /// </summary>
-        IDataSize DataSize{ get; }
+        IDataSize DataSize { get; }
     }
 }

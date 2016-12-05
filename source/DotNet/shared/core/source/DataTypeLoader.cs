@@ -21,66 +21,61 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <summary>
         /// Provider XML element name
         /// </summary>
-        public const string ProviderXmlElementName = "provider";
+        protected const string ProviderXmlElementName = "provider";
 
         /// <summary>
         /// Provider name attribute
         /// </summary>
-        public const string ProviderNameAttributeName = "name";
+        protected const string ProviderNameAttributeName = "name";
 
         /// <summary>
         /// Type XML element name
         /// </summary>
-        public const string TypeXmlElementName = "type";
+        protected const string TypeXmlElementName = "type";
 
         /// <summary>
         /// Type name attribute
         /// </summary>
-        public const string TypeNameAttributeName = "name";
+        protected const string TypeNameAttributeName = "name";
 
         /// <summary>
         /// Type size attribute
         /// </summary>
-        public const string SizeNameAttributeName = "size";
+        protected const string SizeNameAttributeName = "size";
         #endregion XML names
 
         #region Size attribute values
         /// <summary>
         /// size is not required
         /// </summary>
-        public const string DataSizeTypeConfigurationNameForNotRequired = "no";
+        protected const string DataSizeTypeConfigurationNameForNotRequired = "no";
 
         /// <summary>
         /// Size is required
         /// </summary>
-        public const string DataSizeTypeConfigurationNameForRequired = "required";
+        protected const string DataSizeTypeConfigurationNameForRequired = "required";
 
         /// <summary>
         /// Size is required and can apply "MAX"
         /// </summary>
-        public const string DataSizeTypeConfigurationNameForAllowMax = "maximum";
+        protected const string DataSizeTypeConfigurationNameForAllowMax = "maximum";
         #endregion Size attribute values
 
         /// <summary>
         /// Configuration XML filename
         /// </summary>
-        private const string TypesConfigurationXmlFilename = "types.xml";
+        protected const string TypesConfigurationXmlFilename = "types.xml";
 
         /// <summary>
         /// Gets data size name-type mapping 
         /// </summary>
-        private static readonly IReadOnlyDictionary<string, DataSizeType> DataSizeTypeConfigurationNameValueMapping
+        protected static readonly IReadOnlyDictionary<string, DataSizeType> DataSizeTypeConfigurationNameValueMapping
             = new Dictionary<string, DataSizeType>(StringComparer.OrdinalIgnoreCase)
             {
                 { DataSizeTypeConfigurationNameForNotRequired, DataSizeType.NotRequired },
                 { DataSizeTypeConfigurationNameForRequired, DataSizeType.Required },
                 { DataSizeTypeConfigurationNameForAllowMax, DataSizeType.Maximum },
             };
-
-        /// <summary>
-        /// types per provider repository
-        /// </summary>
-        private IReadOnlyDictionary<string, IReadOnlyDictionary<string, IDataType>> dataTypeRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataTypeLoader" /> class.
@@ -96,12 +91,17 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         public DataTypeLoader(XmlElement configurationRootXml)
         {
             var repository = new Dictionary<string, IReadOnlyDictionary<string, IDataType>>(StringComparer.OrdinalIgnoreCase);
-            this.dataTypeRepository = repository;
+            this.DataTypeRepository = repository;
             if (configurationRootXml != null)
             {
                 LoadProviders(repository, configurationRootXml, null);
             }
         }
+
+        /// <summary>
+        /// Gets types per provider repository
+        /// </summary>
+        protected IReadOnlyDictionary<string, IReadOnlyDictionary<string, IDataType>> DataTypeRepository { get; private set; }
 
         /// <summary>
         /// Gets type collection by provider name
@@ -113,7 +113,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
             get
             {
                 IReadOnlyDictionary<string, IDataType> collection;
-                return this.dataTypeRepository.TryGetValue(name, out collection) ? collection : null;
+                return this.DataTypeRepository.TryGetValue(name, out collection) ? collection : null;
             }
         }
 
