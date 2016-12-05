@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{18BC2DB4-0F8E-4C5C-8CEE-A0F4D139680D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Ereadian.DatabaseDocumentGenerator.Core</RootNamespace>
+    <AssemblyName>ereadian.dbdocgen.core</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\..\..\shared\core\source\DatabaseProviderName.cs">
+      <Link>DatabaseProviderName.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\DataSize.cs">
+      <Link>DataSize.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\DataSizeType.cs">
+      <Link>DataSizeType.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\DataType.cs">
+      <Link>DataType.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\DataTypeLoader.cs">
+      <Link>DataTypeLoader.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\DefaultDataTypeFactory.cs">
+      <Link>DefaultDataTypeFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\IColumn.cs">
+      <Link>IColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\IDataSize.cs">
+      <Link>IDataSize.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\IDataType.cs">
+      <Link>IDataType.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\IDataTypeFactory.cs">
+      <Link>IDataTypeFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\ITable.cs">
+      <Link>ITable.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <None Include="..\..\..\shared\core\source\types.xml">
+      <Link>types.xml</Link>
+    </None>
+  </ItemGroup>
+</Project>
