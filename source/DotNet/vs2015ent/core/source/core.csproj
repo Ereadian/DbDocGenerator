@@ -17,7 +17,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;VisualStudio</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -25,7 +25,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;VisualStudio</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -40,6 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\shared\core\source\DatabaseProviderName.cs">
+      <Link>DatabaseProviderName.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\shared\core\source\DataSize.cs">
       <Link>DataSize.cs</Link>
     </Compile>
@@ -51,6 +54,9 @@
     </Compile>
     <Compile Include="..\..\..\shared\core\source\DataTypeLoader.cs">
       <Link>DataTypeLoader.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\DefaultDataTypeFactory.cs">
+      <Link>DefaultDataTypeFactory.cs</Link>
     </Compile>
     <Compile Include="..\..\..\shared\core\source\IColumn.cs">
       <Link>IColumn.cs</Link>
