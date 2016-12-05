@@ -17,8 +17,8 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         string TypeName { get; }
 
         /// <summary>
-        /// Gets flag whether data requires size
+        /// Gets data size type
         /// </summary>
-        bool RequireSize { get; }
+        IDataSize DataSize{ get; }
     }
 }

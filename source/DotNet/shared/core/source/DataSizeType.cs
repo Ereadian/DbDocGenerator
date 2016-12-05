@@ -27,8 +27,8 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         Required,
 
         /// <summary>
-        /// Data size is "MAX"
+        /// Data size is "Maximum"
         /// </summary>
-        Max
+        Maximum
     }
 }

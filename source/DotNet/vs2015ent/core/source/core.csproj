@@ -40,8 +40,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\shared\core\source\DataSize.cs">
+      <Link>DataSize.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\shared\core\source\DataSizeType.cs">
       <Link>DataSizeType.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\DataType.cs">
+      <Link>DataType.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\DataTypeLoader.cs">
+      <Link>DataTypeLoader.cs</Link>
     </Compile>
     <Compile Include="..\..\..\shared\core\source\IColumn.cs">
       <Link>IColumn.cs</Link>
@@ -51,6 +60,9 @@
     </Compile>
     <Compile Include="..\..\..\shared\core\source\IDataType.cs">
       <Link>IDataType.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\IDataTypeFactory.cs">
+      <Link>IDataTypeFactory.cs</Link>
     </Compile>
     <Compile Include="..\..\..\shared\core\source\ITable.cs">
       <Link>ITable.cs</Link>
