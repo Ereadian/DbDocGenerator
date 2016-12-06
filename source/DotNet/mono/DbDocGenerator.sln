@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "core", "core", "{79F90967-B174-4249-8DA4-C11962ECB429}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "source", "core\source\source.csproj", "{18BC2DB4-0F8E-4C5C-8CEE-A0F4D139680D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "core.source", "core\source\core.source.csproj", "{18BC2DB4-0F8E-4C5C-8CEE-A0F4D139680D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "core.test", "core\test\core.test.csproj", "{FDFD3B1C-D875-4A67-BDD8-DF3E5B21075B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{3036CDF3-46A6-4AA7-928A-160AA84F001C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test.source", "common\test.source\test.source.csproj", "{51F9D0BD-2252-441D-82BF-041F1AF19AC7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +21,73 @@ Global
 		{18BC2DB4-0F8E-4C5C-8CEE-A0F4D139680D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{18BC2DB4-0F8E-4C5C-8CEE-A0F4D139680D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{18BC2DB4-0F8E-4C5C-8CEE-A0F4D139680D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51F9D0BD-2252-441D-82BF-041F1AF19AC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51F9D0BD-2252-441D-82BF-041F1AF19AC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51F9D0BD-2252-441D-82BF-041F1AF19AC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51F9D0BD-2252-441D-82BF-041F1AF19AC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDFD3B1C-D875-4A67-BDD8-DF3E5B21075B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDFD3B1C-D875-4A67-BDD8-DF3E5B21075B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDFD3B1C-D875-4A67-BDD8-DF3E5B21075B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDFD3B1C-D875-4A67-BDD8-DF3E5B21075B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{18BC2DB4-0F8E-4C5C-8CEE-A0F4D139680D} = {79F90967-B174-4249-8DA4-C11962ECB429}
+		{FDFD3B1C-D875-4A67-BDD8-DF3E5B21075B} = {79F90967-B174-4249-8DA4-C11962ECB429}
+		{51F9D0BD-2252-441D-82BF-041F1AF19AC7} = {3036CDF3-46A6-4AA7-928A-160AA84F001C}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.DotNetNamingPolicy = $1
+		$1.DirectoryNamespaceAssociation = None
+		$1.ResourceNamePolicy = FileFormatDefault
+		$0.TextStylePolicy = $2
+		$2.inheritsSet = VisualStudio
+		$2.inheritsScope = text/plain
+		$2.scope = text/x-csharp
+		$0.CSharpFormattingPolicy = $3
+		$3.IndentSwitchBody = True
+		$3.IndentBlocksInsideExpressions = True
+		$3.AnonymousMethodBraceStyle = NextLine
+		$3.PropertyBraceStyle = NextLine
+		$3.PropertyGetBraceStyle = NextLine
+		$3.PropertySetBraceStyle = NextLine
+		$3.EventBraceStyle = NextLine
+		$3.EventAddBraceStyle = NextLine
+		$3.EventRemoveBraceStyle = NextLine
+		$3.StatementBraceStyle = NextLine
+		$3.ElseNewLinePlacement = NewLine
+		$3.CatchNewLinePlacement = NewLine
+		$3.FinallyNewLinePlacement = NewLine
+		$3.WhileNewLinePlacement = DoNotCare
+		$3.ArrayInitializerWrapping = DoNotChange
+		$3.ArrayInitializerBraceStyle = NextLine
+		$3.BeforeMethodDeclarationParentheses = False
+		$3.BeforeMethodCallParentheses = False
+		$3.BeforeConstructorDeclarationParentheses = False
+		$3.NewLineBeforeConstructorInitializerColon = NewLine
+		$3.NewLineAfterConstructorInitializerColon = SameLine
+		$3.BeforeDelegateDeclarationParentheses = False
+		$3.NewParentheses = False
+		$3.SpacesBeforeBrackets = False
+		$3.inheritsSet = Mono
+		$3.inheritsScope = text/x-csharp
+		$3.scope = text/x-csharp
+		$0.TextStylePolicy = $4
+		$4.inheritsSet = VisualStudio
+		$4.inheritsScope = text/plain
+		$4.scope = text/plain
+		$0.TextStylePolicy = $5
+		$5.inheritsSet = null
+		$5.scope = application/xml
+		$0.XmlFormattingPolicy = $6
+		$6.inheritsSet = Mono
+		$6.inheritsScope = application/xml
+		$6.scope = application/xml
+		$0.TextStylePolicy = $7
+		$7.inheritsSet = null
+		$7.scope = application/config+xml
+		$0.XmlFormattingPolicy = $8
+		$8.inheritsSet = null
+		$8.scope = application/config+xml
 	EndGlobalSection
 EndGlobal

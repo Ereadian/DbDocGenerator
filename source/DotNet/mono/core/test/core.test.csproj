@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{FDFD3B1C-D875-4A67-BDD8-DF3E5B21075B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Ereadian.DatabaseDocumentGenerator.Core.Test</RootNamespace>
+    <AssemblyName>ereadian.dbdocgen.core.test</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\packages\NUnit.3.5.0\lib\net45\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\source\core.source.csproj">
+      <Project>{18BC2DB4-0F8E-4C5C-8CEE-A0F4D139680D}</Project>
+      <Name>core.source</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\common\test.source\test.source.csproj">
+      <Project>{51F9D0BD-2252-441D-82BF-041F1AF19AC7}</Project>
+      <Name>test.source</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DataTypeLoaderUnitTestRunner.cs" />
+    <Compile Include="..\..\..\shared\core\test\DataTypeLoaderUnitTest.cs">
+      <Link>DataTypeLoaderUnitTest.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\test\DataTypeLoaderWrapper.cs">
+      <Link>DataTypeLoaderWrapper.cs</Link>
+    </Compile>
+  </ItemGroup>
+</Project>

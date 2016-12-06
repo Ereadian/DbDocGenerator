@@ -46,19 +46,18 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Test
 
             var providerXml = DataTypeLoaderWrapper.AddProviderXml(rootXml, providerName);
             string typeName;
-            XmlElement typeElement;
             IDataType dataType;
             foreach (var sizeType in possibleDataSizeTypes)
             {
                 typeName = TestUtility.CreateRandomName("Type{0}");
-                typeElement = DataTypeLoaderWrapper.AddTypeXml(providerXml, typeName, sizeType);
+                DataTypeLoaderWrapper.AddTypeXml(providerXml, typeName, sizeType);
 
                 dataType = DataTypeLoaderWrapper.CreateDataType(typeName, sizeType);
                 types.Add(typeName, dataType);
             }
 
             typeName = TestUtility.CreateRandomName("Type{0}");
-            typeElement = DataTypeLoaderWrapper.AddTypeXml(providerXml, typeName);
+            DataTypeLoaderWrapper.AddTypeXml(providerXml, typeName);
 
             dataType = DataTypeLoaderWrapper.CreateDataType(typeName, DataSizeType.NotRequired);
             types.Add(typeName, dataType);
