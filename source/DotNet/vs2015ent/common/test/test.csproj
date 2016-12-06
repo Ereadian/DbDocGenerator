@@ -40,6 +40,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\shared\common\test\EnumeratorInformation.cs">
+      <Link>EnumeratorInformation.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\common\test\TestUtility.cs">
+      <Link>TestUtility.cs</Link>
+    </Compile>
     <Compile Include="Assert.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -24,5 +24,14 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Test
         {
             base.ConstructorNullXml();
         }
+
+        /// <summary>
+        /// Test constructor by pass simple types for only provider
+        /// </summary>
+        [TestMethod]
+        public override void ConstructorSingleProvider()
+        {
+            base.ConstructorSingleProvider();
+        }
     }
 }
