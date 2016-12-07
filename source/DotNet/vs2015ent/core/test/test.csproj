@@ -59,7 +59,7 @@
     <Compile Include="..\..\..\shared\core\test\DataTypeLoaderWrapper.cs">
       <Link>DataTypeLoaderWrapper.cs</Link>
     </Compile>
-    <Compile Include="DataTypeLoaderUnitTestRunner.cs" />
+    <Compile Include="DatabaseConfigurationProviderUnitTestRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

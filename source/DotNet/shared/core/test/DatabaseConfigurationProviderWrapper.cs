@@ -1,5 +1,5 @@
 ﻿//------------------------------------------------------------------------------------------------------------------------------------------ 
-// <copyright file="DatabaseConfigurationProviderWrapper.cs" company="Ereadian"> 
+// <copyright file="DataTypeLoaderWrapper.cs" company="Ereadian"> 
 //     Copyright (c) Ereadian.  All rights reserved. 
 // </copyright> 
 //------------------------------------------------------------------------------------------------------------------------------------------ 

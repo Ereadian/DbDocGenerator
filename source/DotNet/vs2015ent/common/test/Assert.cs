@@ -37,6 +37,24 @@ namespace Ereadian.DatabaseDocumentGenerator.Common.Test
         }
 
         /// <summary>
+        /// Verifies that two specified generic type data are not equal. The assertion fails if they are equal.        
+        /// </summary>
+        /// <typeparam name="T">type of object to compare</typeparam>
+        /// <param name="notExpected">
+        /// The first generic type data to compare. This is the generic type data the unit test expects not to match actual.
+        /// </param>
+        /// <param name="actual">
+        /// The second generic type data to compare. This is the generic type data the unit test produced.
+        /// </param>
+        /// <exception cref="Original.AssertFailedException">
+        /// notExpected is equal to actual
+        /// </exception>
+        public static void AreNotEqual<T>(T notExpected, T actual)
+        {
+            Original.Assert.AreNotEqual(notExpected, actual);
+        }
+
+        /// <summary>
         /// Check two dictionaries. Throw exception if they are not same
         /// </summary>
         /// <typeparam name="TKey">type of key</typeparam>

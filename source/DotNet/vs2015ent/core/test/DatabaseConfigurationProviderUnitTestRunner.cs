@@ -1,5 +1,5 @@
 ﻿//------------------------------------------------------------------------------------------------------------------------------------------ 
-// <copyright file="DataTypeLoaderUnitTestRunner.cs" company="Ereadian"> 
+// <copyright file="DatabaseConfigurationProviderUnitTestRunner.cs" company="Ereadian"> 
 //     Copyright (c) Ereadian.  All rights reserved. 
 // </copyright> 
 //------------------------------------------------------------------------------------------------------------------------------------------ 
@@ -14,7 +14,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Test
     /// </summary>
     [ExcludeFromCodeCoverage]
     [TestClass]
-    public class DataTypeLoaderUnitTestRunner : DataTypeLoaderUnitTest
+    public class DatabaseConfigurationProviderUnitTestRunner : DatabaseConfigurationProviderUnitTest
     {
         /// <summary>
         /// Test passing null as XML to constructor

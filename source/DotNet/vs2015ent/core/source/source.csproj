@@ -40,6 +40,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\shared\core\source\CollectionExtensions.cs">
+      <Link>CollectionExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\DatabaseConfiguration.cs">
+      <Link>DatabaseConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\DatabaseConfigurationExtensions.cs">
+      <Link>DatabaseConfigurationExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\DatabaseConfigurationProvider.cs">
+      <Link>DatabaseConfigurationProvider.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\shared\core\source\DatabaseProviderName.cs">
       <Link>DatabaseProviderName.cs</Link>
     </Compile>
@@ -52,14 +64,17 @@
     <Compile Include="..\..\..\shared\core\source\DataType.cs">
       <Link>DataType.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\shared\core\source\DataTypeLoader.cs">
-      <Link>DataTypeLoader.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\shared\core\source\DefaultDataTypeFactory.cs">
-      <Link>DefaultDataTypeFactory.cs</Link>
-    </Compile>
     <Compile Include="..\..\..\shared\core\source\IColumn.cs">
       <Link>IColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\IDatabaseAnalyst.cs">
+      <Link>IDatabaseAnalyst.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\IDatabaseConfiguration.cs">
+      <Link>IDatabaseConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\IDatabaseConfigurationProvider.cs">
+      <Link>IDatabaseConfigurationProvider.cs</Link>
     </Compile>
     <Compile Include="..\..\..\shared\core\source\IDataSize.cs">
       <Link>IDataSize.cs</Link>
@@ -67,18 +82,14 @@
     <Compile Include="..\..\..\shared\core\source\IDataType.cs">
       <Link>IDataType.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\shared\core\source\IDataTypeFactory.cs">
-      <Link>IDataTypeFactory.cs</Link>
-    </Compile>
     <Compile Include="..\..\..\shared\core\source\ITable.cs">
       <Link>ITable.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <EmbeddedResource Include="..\..\..\shared\core\source\types.xml">
-      <Link>types.xml</Link>
+    <EmbeddedResource Include="..\..\..\shared\core\source\configurations.xml">
+      <Link>configurations.xml</Link>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

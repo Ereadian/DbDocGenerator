@@ -1,5 +1,5 @@
 ﻿//------------------------------------------------------------------------------------------------------------------------------------------ 
-// <copyright file="DatabaseConfigurationProviderUnitTest.cs" company="Ereadian"> 
+// <copyright file="DataTypeLoaderUnitTest.cs" company="Ereadian"> 
 //     Copyright (c) Ereadian.  All rights reserved. 
 // </copyright> 
 //------------------------------------------------------------------------------------------------------------------------------------------ 

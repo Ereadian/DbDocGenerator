@@ -1,5 +1,5 @@
 ﻿//------------------------------------------------------------------------------------------------------------------------------------------ 
-// <copyright file="DataTypeLoader.cs" company="Ereadian"> 
+// <copyright file="DatabaseConfigurationProvider.cs" company="Ereadian"> 
 //     Copyright (c) Ereadian.  All rights reserved. 
 // </copyright> 
 //------------------------------------------------------------------------------------------------------------------------------------------ 
@@ -15,9 +15,14 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
     /// <summary>
     /// Load data types
     /// </summary>
-    public class DataTypeLoader
+    public class DatabaseConfigurationProvider : IDatabaseConfigurationProvider
     {
         #region XML names
+        /// <summary>
+        /// XML generic name attribute name
+        /// </summary>
+        protected const string NameAttributeName = "name";
+
         /// <summary>
         /// Provider XML element name
         /// </summary>
@@ -26,7 +31,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <summary>
         /// Provider name attribute
         /// </summary>
-        protected const string ProviderNameAttributeName = "name";
+        protected const string ProviderNameAttributeName = NameAttributeName;
 
         /// <summary>
         /// Type XML element name
@@ -36,12 +41,22 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <summary>
         /// Type name attribute
         /// </summary>
-        protected const string TypeNameAttributeName = "name";
+        protected const string TypeNameAttributeName = NameAttributeName;
 
         /// <summary>
         /// Type size attribute
         /// </summary>
         protected const string SizeNameAttributeName = "size";
+
+        /// <summary>
+        /// Command XML element name
+        /// </summary>
+        protected const string CommandXmlElementName = "command";
+
+        /// <summary>
+        /// Command name attribute
+        /// </summary>
+        protected const string CommandNameAttributeName = NameAttributeName;
         #endregion XML names
 
         #region Size attribute values
@@ -64,7 +79,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <summary>
         /// Configuration XML filename
         /// </summary>
-        protected const string TypesConfigurationXmlFilename = "types.xml";
+        protected const string TypesConfigurationXmlFilename = "configurations.xml";
 
         /// <summary>
         /// Gets data size name-type mapping 
@@ -78,42 +93,47 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
             };
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DataTypeLoader" /> class.
+        /// Initializes a new instance of the <see cref="DatabaseConfigurationProvider" /> class.
         /// </summary>
-        public DataTypeLoader() : this(LoadConfigurationXml(TypesConfigurationXmlFilename))
+        public DatabaseConfigurationProvider() : this(LoadConfigurationXml(TypesConfigurationXmlFilename))
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DataTypeLoader" /> class.
+        /// Initializes a new instance of the <see cref="DatabaseConfigurationProvider" /> class.
         /// </summary>
         /// <param name="configurationRootXml">configuration XML</param>
-        public DataTypeLoader(XmlElement configurationRootXml)
+        public DatabaseConfigurationProvider(XmlElement configurationRootXml)
         {
-            var repository = new Dictionary<string, IReadOnlyDictionary<string, IDataType>>(StringComparer.OrdinalIgnoreCase);
-            this.DataTypeRepository = repository;
+            var repository = new Dictionary<string, IDatabaseConfiguration>(StringComparer.OrdinalIgnoreCase);
+            this.ConfigurationRepository = repository;
             if (configurationRootXml != null)
             {
-                LoadProviders(repository, configurationRootXml, null);
+                LoadProviders(repository, configurationRootXml, null, null);
             }
         }
 
         /// <summary>
-        /// Gets types per provider repository
+        /// Gets all database provider names
         /// </summary>
-        protected IReadOnlyDictionary<string, IReadOnlyDictionary<string, IDataType>> DataTypeRepository { get; private set; }
+        public IReadOnlyCollection<string> SupportedDatabaseProviderNames { get; private set; }
 
         /// <summary>
-        /// Gets type collection by provider name
+        /// Gets types per provider repository
         /// </summary>
-        /// <param name="name">provider name</param>
-        /// <returns>types supported by this provide</returns>
-        public IReadOnlyDictionary<string, IDataType> this[string name]
+        protected IReadOnlyDictionary<string, IDatabaseConfiguration> ConfigurationRepository { get; private set; }
+
+        /// <summary>
+        /// Gets database provider configuration by given provider name
+        /// </summary>
+        /// <param name="databaseProviderName">database provider name</param>
+        /// <returns>database provider configuration</returns>
+        public IDatabaseConfiguration this[string databaseProviderName]
         {
             get
             {
-                IReadOnlyDictionary<string, IDataType> collection;
-                return this.DataTypeRepository.TryGetValue(name, out collection) ? collection : null;
+                IDatabaseConfiguration configuration;
+                return this.ConfigurationRepository.TryGetValue(databaseProviderName, out configuration) ? configuration : null;
             }
         }
 
@@ -125,7 +145,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         private static XmlElement LoadConfigurationXml(string filename)
         {
             XmlElement configurationXml = null;
-            var type = typeof(DataTypeLoader);
+            var type = typeof(DatabaseConfigurationProvider);
             using (var stream = type.Assembly.GetManifestResourceStream(type, filename))
             {
                 if (stream == null)
@@ -154,13 +174,17 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <param name="repository">provider repository</param>
         /// <param name="providerXml">provider XML</param>
         /// <param name="parentTypes">parent type collection</param>
+        /// <param name="parentCommands">parent commands</param>
         private static void LoadProviders(
-            IDictionary<string, IReadOnlyDictionary<string, IDataType>> repository,
+            IDictionary<string, IDatabaseConfiguration> repository,
             XmlElement providerXml,
-            IReadOnlyDictionary<string, IDataType> parentTypes)
+            IReadOnlyDictionary<string, IDataType> parentTypes,
+            IReadOnlyDictionary<string, string> parentCommands)
         {
             var types = LoadTypes(providerXml, parentTypes);
-            if (types != null)
+            var commands = LoadCommands(providerXml, parentCommands);
+            IDatabaseConfiguration configuration = null;
+            if ((types != null) || (commands != null))
             {
                 string providerName = providerXml.GetAttribute(ProviderNameAttributeName);
                 if (!string.IsNullOrWhiteSpace(providerName))
@@ -177,7 +201,8 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
                         throw new ArgumentException(errorMessage);
                     }
 
-                    repository.Add(providerName, types);
+                    configuration = new DatabaseConfiguration(types, commands);
+                    repository.Add(providerName, configuration);
                 }
             }
 
@@ -198,7 +223,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
                         throw new ArgumentException(errorMessage);
                     }
 
-                    LoadProviders(repository, inheritedProviderXml, types);
+                    LoadProviders(repository, inheritedProviderXml, types, commands);
                 }
             }
         }
@@ -213,7 +238,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
             XmlElement providerXml, 
             IReadOnlyDictionary<string, IDataType> parentTypes)
         {
-            Dictionary<string, IDataType> typesSupportedByProvider = null;
+            Dictionary<string, IDataType> supportedTypes = null;
             var typeNodeCollection = providerXml.SelectNodes(TypeXmlElementName);
             if (typeNodeCollection != null)
             {
@@ -230,9 +255,9 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
                         throw new ArgumentException(errorMessage);
                     }
 
-                    if (typesSupportedByProvider == null)
+                    if (supportedTypes == null)
                     {
-                        typesSupportedByProvider = new Dictionary<string, IDataType>(StringComparer.OrdinalIgnoreCase);
+                        supportedTypes = new Dictionary<string, IDataType>(StringComparer.OrdinalIgnoreCase);
                     }
 
                     var typeName = typeXmlElement.GetAttribute(TypeNameAttributeName);
@@ -247,7 +272,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
                         throw new ArgumentException(errorMessage);
                     }
 
-                    if (typesSupportedByProvider.ContainsKey(typeName))
+                    if (supportedTypes.ContainsKey(typeName))
                     {
                         var errorMessage = string.Format(
                             CultureInfo.InvariantCulture,
@@ -282,28 +307,97 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
                     var dataType = new DataType(
                         typeName,
                         new DataSize(sizeType, null));
-                    typesSupportedByProvider.Add(typeName, dataType);
+                    supportedTypes.Add(typeName, dataType);
                 }
             }
 
-            if ((typesSupportedByProvider == null) || (typesSupportedByProvider.Count < 1))
+            if ((supportedTypes == null) || (supportedTypes.Count < 1))
             {
                 return parentTypes;
             }
 
-            if (parentTypes != null)
+            supportedTypes.AppendFromReadOnly(parentTypes);
+            return supportedTypes;
+        }
+
+        /// <summary>
+        /// Load commands for current provider
+        /// </summary>
+        /// <param name="providerXml">current provider XML</param>
+        /// <param name="parentCommands">parent commands</param>
+        /// <returns>commands for current provider</returns>
+        private static IReadOnlyDictionary<string, string> LoadCommands(
+            XmlElement providerXml,
+            IReadOnlyDictionary<string, string> parentCommands)
+        {
+            Dictionary<string, string> commands = null;
+            var commandNodeCollection = providerXml.SelectNodes(CommandXmlElementName);
+            if (commandNodeCollection != null)
             {
-                foreach (var pair in parentTypes)
+                foreach (XmlNode commandNode in commandNodeCollection)
                 {
-                    var typeName = pair.Key;
-                    if (!typesSupportedByProvider.ContainsKey(typeName))
+                    var commandXmlElement = commandNode as XmlElement;
+                    if (commandXmlElement == null)
                     {
-                        typesSupportedByProvider.Add(typeName, pair.Value);
+                        var errorMessage = string.Format(
+                            CultureInfo.InvariantCulture,
+                            "Require command XML element but the actual is not. XML: {0}",
+                            commandNode.OuterXml);
+                        Trace.TraceError(errorMessage);
+                        throw new ArgumentException(errorMessage);
                     }
+
+                    if (commands == null)
+                    {
+                        commands = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    }
+
+                    var commandName = commandXmlElement.GetAttribute(CommandNameAttributeName);
+                    if (string.IsNullOrEmpty(commandName))
+                    {
+                        var errorMessage = string.Format(
+                            CultureInfo.InvariantCulture,
+                            "Command attribute \"{0}\" is required but the actual does not have or it is blank. XML: {1}",
+                            CommandNameAttributeName,
+                            commandNode.OuterXml);
+                        Trace.TraceError(errorMessage);
+                        throw new ArgumentException(errorMessage);
+                    }
+
+                    if (commands.ContainsKey(commandName))
+                    {
+                        var errorMessage = string.Format(
+                            CultureInfo.InvariantCulture,
+                            "Command \"{0}\" has been defined. Duplicated command name found. XML: {1}",
+                            commandName,
+                            commandXmlElement.OuterXml);
+                        Trace.TraceError(errorMessage);
+                        throw new ArgumentException(errorMessage);
+                    }
+
+                    var commandText = commandXmlElement.InnerText;
+                    if (string.IsNullOrWhiteSpace(commandText))
+                    {
+                        var errorMessage = string.Format(
+                            CultureInfo.InvariantCulture,
+                            "Command \"{0}\" does not have valid content. XML: {1}",
+                            commandName,
+                            commandXmlElement.OuterXml);
+                        Trace.TraceError(errorMessage);
+                        throw new ArgumentException(errorMessage);
+                    }
+
+                    commands.Add(commandName, commandText);
                 }
             }
 
-            return typesSupportedByProvider;
+            if ((commands == null) || (commands.Count < 1))
+            {
+                return parentCommands;
+            }
+
+            commands.AppendFromReadOnly(parentCommands);
+            return commands;
         }
     }
 }
