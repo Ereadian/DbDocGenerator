@@ -53,14 +53,18 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="..\..\..\shared\core\test\DataTypeLoaderUnitTest.cs">
-      <Link>DataTypeLoaderUnitTest.cs</Link>
+    <Compile Include="..\..\..\shared\core\test\DatabaseConfigurationProviderUnitTest.cs">
+      <Link>DatabaseConfigurationProviderUnitTest.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\shared\core\test\DataTypeLoaderWrapper.cs">
-      <Link>DataTypeLoaderWrapper.cs</Link>
+    <Compile Include="..\..\..\shared\core\test\DatabaseConfigurationProviderWrapper.cs">
+      <Link>DatabaseConfigurationProviderWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\test\SingletonUnitTest.cs">
+      <Link>SingletonUnitTest.cs</Link>
     </Compile>
     <Compile Include="DatabaseConfigurationProviderUnitTestRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SingletonUnitTestRunner.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\common\test\test.csproj">

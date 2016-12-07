@@ -85,6 +85,9 @@
     <Compile Include="..\..\..\shared\core\source\ITable.cs">
       <Link>ITable.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\shared\core\source\Singleton.cs">
+      <Link>Singleton.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
