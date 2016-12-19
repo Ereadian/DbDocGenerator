@@ -53,6 +53,9 @@
     <Compile Include="..\..\..\shared\core\source\DatabaseConfigurationProvider.cs">
       <Link>DatabaseConfigurationProvider.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\shared\core\source\DatabaseOperation.cs">
+      <Link>DatabaseOperation.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\shared\core\source\DatabaseProviderName.cs">
       <Link>DatabaseProviderName.cs</Link>
     </Compile>
@@ -134,6 +137,9 @@
     <EmbeddedResource Include="..\..\..\shared\core\source\configurations.xml">
       <Link>configurations.xml</Link>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="SqlServer\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

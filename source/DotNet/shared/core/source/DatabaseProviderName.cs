@@ -14,7 +14,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <summary>
         /// Name of Microsoft SQL Server
         /// </summary>
-        public const string MsSql = "MS SQL";
+        public const string SqlServer = "MicrosoftSqlServer";
 
         /// <summary>
         /// Name of My SQL

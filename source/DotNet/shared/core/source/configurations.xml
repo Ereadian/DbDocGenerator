@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <types>
-  <provider name="MS SQL">
+  <provider name="MicrosoftSqlServer">
     <type name="INT" />
     <type name="BIGINT" />
     <type name="UNIQUEIDENTIFIER" />
