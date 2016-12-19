@@ -21,21 +21,22 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <summary>
         /// Constructor information
         /// </summary>
-        private readonly ConstructorInfo TypeConstructorInformation;
+        private readonly ConstructorInfo typeConstructorInformation;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjectCreator{TBaseClass, TInterface}" /> class.
         /// </summary>
+        /// <param name="logger">event logger</param>
         public ObjectCreator(ILogger logger)
         {
             try
             {
                 var type = Utility.CreateType(typeof(TBaseClass), typeof(TInterface));
-                TypeConstructorInformation = type.GetConstructor(Type.EmptyTypes);
+                this.typeConstructorInformation = type.GetConstructor(Type.EmptyTypes);
             }
             catch (Exception exception)
             {
-                TypeConstructorInformation = null;
+                this.typeConstructorInformation = null;
                 logger.Write(
                     Events.FailedToCreateDynamicType, 
                     typeof(TBaseClass).FullName, 
@@ -50,7 +51,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <returns>new instance which supports the interface</returns>
         public virtual TInterface Create()
         {
-            return TypeConstructorInformation == null ? null : (TInterface)TypeConstructorInformation.Invoke(null);
+            return this.typeConstructorInformation == null ? null : (TInterface)this.typeConstructorInformation.Invoke(null);
         }
     }
 }

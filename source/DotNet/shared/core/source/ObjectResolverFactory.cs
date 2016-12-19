@@ -6,51 +6,30 @@
 
 namespace Ereadian.DatabaseDocumentGenerator.Core
 {
-    using System;
     using System.Configuration;
-    using System.Diagnostics;
-    using System.Globalization;
 
+    /// <summary>
+    /// Object resolver factory
+    /// </summary>
     public class ObjectResolverFactory : IObjectResolverFactory
     {
+        /// <summary>
+        /// resolver type name configuration key
+        /// </summary>
         private const string FactoryTypeConfigurationKey = "ObjectResolverTypeName";
 
+        /// <summary>
+        /// current resolver factory instance
+        /// </summary>
         private readonly IObjectResolverFactory instance;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ObjectResolverFactory" /> class.
+        /// </summary>
         public ObjectResolverFactory()
         {
-            IObjectResolverFactory factory = null;
-            try
-            {
-                var typeName = ConfigurationManager.AppSettings[FactoryTypeConfigurationKey];
-                if (string.IsNullOrWhiteSpace(typeName))
-                {
-                    var type = Type.GetType(typeName);
-                    if (type != null)
-                    {
-                        var rawData = Activator.CreateInstance(type);
-                        if (rawData != null)
-                        {
-                            factory = (IObjectResolverFactory)rawData;
-                            if (factory == null)
-                            {
-                                var errorMessage = string.Format(
-                                    "");
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception exception)
-            {
-                var errorMessage = string.Format(
-                    CultureInfo.InvariantCulture,
-                    "Failed to create {0}. Error:{1}",
-                    typeof(IObjectResolverFactory).FullName,
-                    exception.ToString());
-                Trace.TraceError(errorMessage);
-            }
-
+            var typeName = ConfigurationManager.AppSettings[FactoryTypeConfigurationKey];
+            var factory = Utility.CreateInstanceFromTypeName<IObjectResolverFactory>(typeName, Singleton<LogTrace>.Instance);
             if (factory == null)
             {
                 factory = new DefaultObjectResolverFactory();
@@ -65,7 +44,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <typeparam name="T">type to resolve</typeparam>
         /// <param name="resolverName">resolver name</param>
         /// <returns>resolver instance</returns>
-        public IObjectResolver<T> GetResolver<T>(string resolverName = null) where T: class
+        public IObjectResolver<T> GetResolver<T>(string resolverName = null) where T : class
         {
             return this.instance.GetResolver<T>(resolverName);
         }

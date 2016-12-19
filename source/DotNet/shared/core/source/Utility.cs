@@ -7,15 +7,23 @@
 namespace Ereadian.DatabaseDocumentGenerator.Core
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using System.Reflection;
     using System.Reflection.Emit;
+    using System.Text;
 
+    /// <summary>
+    /// Utility functions
+    /// </summary>
     public static class Utility
     {
+        /// <summary>
+        /// Create object from type name
+        /// </summary>
+        /// <typeparam name="T">object type (instance)</typeparam>
+        /// <param name="typeName">object type name</param>
+        /// <param name="logger">event logger</param>
+        /// <returns>object instance</returns>
         public static T CreateInstanceFromTypeName<T>(string typeName, ILogger logger) where T : class
         {
             T instance = null;

@@ -1,17 +1,14 @@
 ﻿//------------------------------------------------------------------------------------------------------------------------------------------ 
-// <copyright file="ObjectResolver.cs" company="Ereadian"> 
+// <copyright file="IObjectResolverFactory.cs" company="Ereadian"> 
 //     Copyright (c) Ereadian.  All rights reserved. 
 // </copyright> 
 //------------------------------------------------------------------------------------------------------------------------------------------ 
 
 namespace Ereadian.DatabaseDocumentGenerator.Core
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-
+    /// <summary>
+    /// Object resolver factory interface
+    /// </summary>
     public interface IObjectResolverFactory
     {
         /// <summary>
@@ -20,6 +17,6 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <typeparam name="T">type to resolve</typeparam>
         /// <param name="resolverName">resolver name</param>
         /// <returns>resolver instance</returns>
-        IObjectResolver<T> GetResolver<T>(string resolverName = null) where T: class;
+        IObjectResolver<T> GetResolver<T>(string resolverName = null) where T : class;
     }
 }
