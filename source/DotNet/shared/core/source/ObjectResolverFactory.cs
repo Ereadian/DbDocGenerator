@@ -7,14 +7,9 @@
 namespace Ereadian.DatabaseDocumentGenerator.Core
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using System.Configuration;
-    using System.Reflection;
-    using System.Globalization;
     using System.Diagnostics;
+    using System.Globalization;
 
     public class ObjectResolverFactory : IObjectResolverFactory
     {

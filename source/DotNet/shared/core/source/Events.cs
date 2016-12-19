@@ -24,9 +24,15 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         InstanceTypeMismatch,
 
         /// <summary>
-        /// Could not find type for interface during resolver factory initizaliation
+        /// Could not find type for interface during resolver factory initialization
         /// </summary>
         [Event("Could not load type for interface \"{0}\"")]
         InterfaceTypeDoesNotExist,
+
+        /// <summary>
+        /// Failed to create dynamic type
+        /// </summary>
+        [Event("Failed to create dynamic type. Base type: {0}, interface: {1}. Exception:{2}")]
+        FailedToCreateDynamicType,
     }
 }

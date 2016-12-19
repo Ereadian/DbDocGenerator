@@ -10,23 +10,26 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
 
     public class ObjectResolver<T> : IObjectResolver<T> where T : class
     {
+        private ObjectCreator<object, T> creator;
         private readonly Lazy<T> instance;
 
         public ObjectResolver(string typeName, ILogger logger)
         {
             if (string.IsNullOrEmpty(typeName))
             {
-                instance = new Lazy<T>(() => Singleton<ObjectFactory>.Instance.Create<object, T>());
+                this.creator = new ObjectCreator<object, T>(logger);
+                this.instance = null;
             }
             else
             {
-                instance = new Lazy<T>(() => Utility.CreateInstanceFromTypeName<T>(typeName, logger));
+                this.creator = null;
+                this.instance = new Lazy<T>(() => Utility.CreateInstanceFromTypeName<T>(typeName, logger));
             }
         }
 
         public T Resolve()
         {
-            return this.instance.Value;
+            return this.instance == null ? this.instance.Value : this.creator.Create();
         }
     }
 }

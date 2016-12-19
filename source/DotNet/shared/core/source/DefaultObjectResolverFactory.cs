@@ -36,15 +36,28 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// </summary>
         protected static readonly IReadOnlyDictionary<Type, Type> DefaultResolvers = new Dictionary<Type, Type>()
         {
-            { typeof(ILogger), typeof(LogTrace)},
+            { typeof(ILogger), typeof(LogTrace) },
+            { typeof(ITable), null },
+            { typeof(IColumn), null },
         };
 
-        private IReadOnlyDictionary<Type, IReadOnlyDictionary<string, object>> resolvers;
+        /// <summary>
+        /// Resolver repository
+        /// </summary>
+        private IReadOnlyDictionary<Type, IReadOnlyDictionary<string, object>> resolverRepository;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultObjectResolverFactory" /> class.
+        /// </summary>
         public DefaultObjectResolverFactory() : this(ConfigurationManager.AppSettings, Singleton<LogTrace>.Instance)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultObjectResolverFactory" /> class.
+        /// </summary>
+        /// <param name="configurations">configuration data</param>
+        /// <param name="logger">event logger</param>
         public DefaultObjectResolverFactory(NameValueCollection configurations, ILogger logger)
         {
             var resolverCollection = new Dictionary<Type, IReadOnlyDictionary<string, object>>();
@@ -73,21 +86,34 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
             }
 
             AddDefaultResolvers(resolverCollection, DefaultResolvers, logger);
-            this.resolvers = resolverCollection;
+            this.resolverRepository = resolverCollection;
         }
 
-        public IObjectResolver<T> GetResolver<T>(string resolverName = null) where T: class
+        /// <summary>
+        /// Get object resolver
+        /// </summary>
+        /// <typeparam name="T">type to resolve</typeparam>
+        /// <param name="resolverName">resolver name</param>
+        /// <returns>resolver instance</returns>
+        public IObjectResolver<T> GetResolver<T>(string resolverName = null) where T : class
         {
-            return GetResolver(this.resolvers, typeof(T), resolverName ?? string.Empty) as IObjectResolver<T>;
+            return GetResolver(this.resolverRepository, typeof(T), resolverName ?? string.Empty) as IObjectResolver<T>;
         }
 
-        public static object GetResolver(
-            IReadOnlyDictionary<Type, IReadOnlyDictionary<string, object>> resolverCollection, 
+        /// <summary>
+        /// Get resolver helper
+        /// </summary>
+        /// <param name="repository">resolver repository</param>
+        /// <param name="interfaceType">type of interface</param>
+        /// <param name="resolverName">resolver name</param>
+        /// <returns>resolver instance</returns>
+        private static object GetResolver(
+            IReadOnlyDictionary<Type, IReadOnlyDictionary<string, object>> repository, 
             Type interfaceType, 
             string resolverName)
         {
             IReadOnlyDictionary<string, object> resolvers;
-            if (resolverCollection.TryGetValue(interfaceType, out resolvers))
+            if (repository.TryGetValue(interfaceType, out resolvers))
             {
                 object resolver;
                 if (resolvers.TryGetValue(resolverName, out resolver))
@@ -99,45 +125,71 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
             return null;
         }
 
-        protected static object CreateResolver(Type interfaceType, string className, ILogger logger)
+        /// <summary>
+        /// Create new resolver
+        /// </summary>
+        /// <param name="interfaceType">interface type</param>
+        /// <param name="className">target instance class name</param>
+        /// <param name="logger">event logger</param>
+        /// <returns>resolver instance</returns>
+        private static object CreateResolver(Type interfaceType, string className, ILogger logger)
         {
             var resolverType = typeof(ObjectResolver<>).MakeGenericType(interfaceType);
             return Activator.CreateInstance(resolverType, className, logger);
         }
 
-        protected static void AddResolver(
-            IDictionary<Type, IReadOnlyDictionary<string, object>> resolverCollection,
+        /// <summary>
+        /// Add resolver to repository
+        /// </summary>
+        /// <param name="repository">resolver repository</param>
+        /// <param name="interfaceType">interface type</param>
+        /// <param name="resolverName">resolver name</param>
+        /// <param name="resolver">resolver instance</param>
+        private static void AddResolver(
+            IDictionary<Type, IReadOnlyDictionary<string, object>> repository,
             Type interfaceType,
             string resolverName,
             object resolver)
         {
             IReadOnlyDictionary<string, object> currentResolvers;
-            if (!resolverCollection.TryGetValue(interfaceType, out currentResolvers))
+            if (!repository.TryGetValue(interfaceType, out currentResolvers))
             {
                 currentResolvers = new Dictionary<string, object>();
-                resolverCollection.Add(interfaceType, currentResolvers);
+                repository.Add(interfaceType, currentResolvers);
             }
             
             ((Dictionary<string, object>)currentResolvers)[resolverName] = resolver;
         }
 
-        protected static void AddDefaultResolvers(
-            Dictionary<Type, IReadOnlyDictionary<string, object>> resolvers, 
+        /// <summary>
+        /// Add default resolver into resolver repository if they have not been defined
+        /// </summary>
+        /// <param name="respository">resolver repository</param>
+        /// <param name="defaultResolverTypes">default types</param>
+        /// <param name="logger">event logger</param>
+        private static void AddDefaultResolvers(
+            Dictionary<Type, IReadOnlyDictionary<string, object>> respository, 
             IReadOnlyDictionary<Type, Type> defaultResolverTypes,
             ILogger logger)
         {
             foreach (var pair in defaultResolverTypes)
             {
-                var resolver = GetResolver(resolvers, pair.Key, string.Empty);
+                var resolver = GetResolver(respository, pair.Key, string.Empty);
                 if (resolver == null)
                 {
-                    resolver = CreateResolver(pair.Key, pair.Value.AssemblyQualifiedName, logger);
-                    AddResolver(resolvers, pair.Key, string.Empty, resolver);
+                    string typeName = pair.Value != null ? pair.Value.AssemblyQualifiedName : null;
+                    resolver = CreateResolver(pair.Key, typeName, logger);
+                    AddResolver(respository, pair.Key, string.Empty, resolver);
                 }
             }
         }
 
-        protected static Tuple<string, string> GetResolverInformation(string configurationKey)
+        /// <summary>
+        /// Get resolver information from configuration key
+        /// </summary>
+        /// <param name="configurationKey">configuration key</param>
+        /// <returns>resolver information</returns>
+        private static Tuple<string, string> GetResolverInformation(string configurationKey)
         {
             if (!configurationKey.StartsWith(ResolverConfiguraitonKeyPrefix, StringComparison.Ordinal)
                 || (configurationKey.Length <= (ResolverConfiguraitonKeyPrefix.Length + 1)))

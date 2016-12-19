@@ -14,7 +14,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Test
     /// </summary>
     [ExcludeFromCodeCoverage]
     [TestClass]
-    public class DefaultObjectFactoryUnitTestRunner : DefaultObjectFactoryUnitTest
+    public class UtilityUnitTestRunner : UtilityUnitTest
     {
         #region CreateName()
         /// <summary>

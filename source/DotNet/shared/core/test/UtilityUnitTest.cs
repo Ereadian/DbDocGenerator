@@ -1,5 +1,5 @@
 ﻿//------------------------------------------------------------------------------------------------------------------------------------------ 
-// <copyright file="DefaultObjectFactoryUnitTest.cs" company="Ereadian"> 
+// <copyright file="UtilityUnitTest.cs" company="Ereadian"> 
 //     Copyright (c) Ereadian.  All rights reserved. 
 // </copyright> 
 //------------------------------------------------------------------------------------------------------------------------------------------ 
@@ -17,7 +17,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Test
     /// Unit test for default object factory
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class DefaultObjectFactoryUnitTest
+    public class UtilityUnitTest
     {
         #region test interfaces
         /// <summary>
@@ -52,7 +52,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Test
         public virtual void CreateName_AllCharactersAreValid()
         {
             var prefix = "CurrentName_0123";
-            var newName = ObjectFactoryForTest<object, ISimpleForForDefaultObjectFactoryUnitTest>.CreateNameForTest(prefix);
+            var newName = Utility.CreateName(prefix);
             Assert.IsTrue(newName.StartsWith(prefix, StringComparison.Ordinal));
             var suffix = newName.Substring(prefix.Length);
             Guid guid;
@@ -77,7 +77,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Test
                 }
             }
 
-            var newName = ObjectFactoryForTest<object, ISimpleForForDefaultObjectFactoryUnitTest>.CreateNameForTest(builder.ToString());
+            var newName = Utility.CreateName(builder.ToString());
             Assert.IsTrue(newName.StartsWith(prefix, StringComparison.Ordinal));
             var suffix = newName.Substring(prefix.Length);
             Guid guid;
@@ -91,11 +91,8 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Test
         /// </summary>
         public virtual void CreateObjectConstructor_Simple_NoBaseType()
         {
-            var constructorInformation = ObjectFactoryForTest<object, ISimpleForForDefaultObjectFactoryUnitTest>
-                .CreateObjectGeneratorForTest();
-            var instance = constructorInformation.Invoke(null);
+            var instance = CreateObject<object, ISimpleForForDefaultObjectFactoryUnitTest>();
             Assert.IsNotNull(instance);
-            Assert.IsTrue(instance is ISimpleForForDefaultObjectFactoryUnitTest);
         }
 
         /// <summary>
@@ -103,9 +100,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Test
         /// </summary>
         public virtual void CreateObjectConstructor_Composite_NoBaseType()
         {
-            var constructorInformation = ObjectFactoryForTest<object, ISimpleForForDefaultObjectFactoryUnitTest>
-                .CreateObjectGeneratorForTest(typeof(object), typeof(ICompositeForDefaultObjectFactoryUnitTest));
-            var instance = constructorInformation.Invoke(null);
+            var instance = CreateObject<object, ICompositeForDefaultObjectFactoryUnitTest>();
             Assert.IsNotNull(instance);
             TestInterface(instance as ICompositeForDefaultObjectFactoryUnitTest);
         }
@@ -120,9 +115,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Test
             try
             {
                 BaseClassForTest.ConstructorCallback = () => Interlocked.Increment(ref callCount);
-                var constructorInformation = ObjectFactoryForTest<object, ISimpleForForDefaultObjectFactoryUnitTest>
-                    .CreateObjectGeneratorForTest(typeof(BaseClassForTest), typeof(ICompositeForDefaultObjectFactoryUnitTest));
-                instance = constructorInformation.Invoke(null);
+                instance = CreateObject<BaseClassForTest, ICompositeForDefaultObjectFactoryUnitTest>();
             }
             finally
             {
@@ -136,6 +129,21 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Test
         #endregion CreateObjectConstructor()
 
         #region Helper
+        /// <summary>
+        /// Create object
+        /// </summary>
+        /// <typeparam name="TBaseClass">base type</typeparam>
+        /// <typeparam name="TInterface">interface type</typeparam>
+        /// <returns>instance from dynamic type</returns>
+        private static TInterface CreateObject<TBaseClass, TInterface>()
+        {
+            var type = Utility.CreateType(typeof(TBaseClass), typeof(TInterface));
+            Assert.IsNotNull(type);
+            var instance = Activator.CreateInstance(type);
+            Assert.IsNotNull(instance);
+            return (TInterface)instance;
+        }
+
         /// <summary>
         /// Test interface
         /// </summary>
@@ -184,51 +192,5 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Test
             public static Action ConstructorCallback { get; set; }
         }
         #endregion class for testing
-
-        #region DefaultObjectFactoryWrapper
-        /// <summary>
-        /// Wrapper for default object factory
-        /// </summary>
-        /// <typeparam name="TBase">type of base class</typeparam>
-        /// <typeparam name="TInterface">type of interface</typeparam>
-        [ExcludeFromCodeCoverage]
-        public class ObjectFactoryForTest<TBase, TInterface> : DefaultObjectFactory<TBase, TInterface>
-            where TBase : class, new()
-            where TInterface : class
-        {
-            /// <summary>
-            /// Wrapper for creating random name
-            /// </summary>
-            /// <param name="prefix">name prefix</param>
-            /// <returns>random name</returns>
-            internal static string CreateNameForTest(string prefix)
-            {
-                return ObjectFactoryForTest<TBase, TInterface>.CreateName(prefix);
-            }
-
-            /// <summary>
-            /// Wrapper for creating object constructor
-            /// </summary>
-            /// <param name="baseType">base type</param>
-            /// <param name="interfaceType">type of interface</param>
-            /// <returns>constructor information</returns>
-            internal static ConstructorInfo CreateObjectGeneratorForTest(
-                Type baseType = null, 
-                Type interfaceType = null)
-            {
-                if (baseType == null)
-                {
-                    baseType = typeof(object);
-                }
-
-                if (interfaceType == null)
-                {
-                    interfaceType = typeof(TInterface);
-                }
-
-                return ObjectFactoryForTest<TBase, TInterface>.CreateObjectConstructor(baseType, interfaceType);
-            }
-        }
-        #endregion DefaultObjectFactoryWrapper
     }
 }

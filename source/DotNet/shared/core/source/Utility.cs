@@ -208,5 +208,21 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
 
             return methodBuilder;
         }
+
+        /// <summary>
+        /// Create type and return default constructor information
+        /// </summary>
+        /// <param name="baseType">base type</param>
+        /// <param name="interfaceType">type of the interface to implement</param>
+        /// <returns>dynamic type</returns>
+        public static Type CreateType(Type baseType, Type interfaceType)
+        {
+            var assemblyBuilder = Utility.CreateAssemblyBuilder(interfaceType);
+            var moduleBuilder = Utility.CreateModuleBuilder(assemblyBuilder, interfaceType);
+            var typeBuilder = Utility.CreateTypeBuilder(moduleBuilder, baseType, interfaceType);
+            var constructorBuilder = Utility.CreateDefaultConstructor(typeBuilder, baseType, interfaceType);
+            Utility.CreateProperties(typeBuilder, interfaceType);
+            return typeBuilder.CreateType();
+        }
     }
 }
