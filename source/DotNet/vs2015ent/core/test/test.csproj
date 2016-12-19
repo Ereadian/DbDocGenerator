@@ -59,10 +59,14 @@
     <Compile Include="..\..\..\shared\core\test\DatabaseConfigurationProviderWrapper.cs">
       <Link>DatabaseConfigurationProviderWrapper.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\shared\core\test\DefaultObjectFactoryUnitTest.cs">
+      <Link>DefaultObjectFactoryUnitTest.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\shared\core\test\SingletonUnitTest.cs">
       <Link>SingletonUnitTest.cs</Link>
     </Compile>
     <Compile Include="DatabaseConfigurationProviderUnitTestRunner.cs" />
+    <Compile Include="DefaultObjectFactoryUnitTestRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SingletonUnitTestRunner.cs" />
   </ItemGroup>

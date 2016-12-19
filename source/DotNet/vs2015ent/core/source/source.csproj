@@ -64,6 +64,9 @@
     <Compile Include="..\..\..\shared\core\source\DataType.cs">
       <Link>DataType.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\shared\core\source\DefaultObjectFactory.cs">
+      <Link>DefaultObjectFactory.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\shared\core\source\IColumn.cs">
       <Link>IColumn.cs</Link>
     </Compile>
@@ -81,6 +84,9 @@
     </Compile>
     <Compile Include="..\..\..\shared\core\source\IDataType.cs">
       <Link>IDataType.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\IObjectFactory.cs">
+      <Link>IObjectFactory.cs</Link>
     </Compile>
     <Compile Include="..\..\..\shared\core\source\ITable.cs">
       <Link>ITable.cs</Link>
