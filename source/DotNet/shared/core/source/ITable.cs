@@ -14,7 +14,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
     public interface ITable
     {
         /// <summary>
-        /// Gets or Sets Schema Name (for example, "DBO")
+        /// Gets or sets Schema Name (for example, "DBO")
         /// </summary>
         string SchemaName { get; set; }
 
@@ -24,7 +24,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         string TableName { get; set; }
 
         /// <summary>
-        /// Gets or Sets columns
+        /// Gets or sets columns
         /// </summary>
         IList<IColumn> Columns { get; set; }
     }

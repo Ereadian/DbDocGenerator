@@ -19,6 +19,32 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Test
     [ExcludeFromCodeCoverage]
     public class DefaultObjectFactoryUnitTest
     {
+        #region test interfaces
+        /// <summary>
+        /// Simple empty interface
+        /// </summary>
+        public interface ISimpleForForDefaultObjectFactoryUnitTest
+        {
+        }
+
+        /// <summary>
+        /// Composite interface which has multiple properties
+        /// </summary>
+        public interface ICompositeForDefaultObjectFactoryUnitTest
+        {
+            /// <summary>
+            /// Gets or sets integer
+            /// </summary>
+            int IntData { get; set; }
+
+            /// <summary>
+            /// Gets or sets string
+            /// </summary>
+            string StrData { get; set; }
+        }
+
+        #endregion test interfaces
+
         #region CreateName()
         /// <summary>
         /// Test GetName() when pass string with all valid characters
@@ -50,6 +76,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Test
                     builder.Append(invalidCharacters[random.Next(invalidCharacters.Length)]);
                 }
             }
+
             var newName = ObjectFactoryForTest<object, ISimpleForForDefaultObjectFactoryUnitTest>.CreateNameForTest(builder.ToString());
             Assert.IsTrue(newName.StartsWith(prefix, StringComparison.Ordinal));
             var suffix = newName.Substring(prefix.Length);
@@ -109,6 +136,10 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Test
         #endregion CreateObjectConstructor()
 
         #region Helper
+        /// <summary>
+        /// Test interface
+        /// </summary>
+        /// <param name="instance">instance to test</param>
         private static void TestInterface(ICompositeForDefaultObjectFactoryUnitTest instance)
         {
             Assert.IsNotNull(instance);
@@ -129,24 +160,50 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Test
 
         #endregion Helper
 
-        #region types for testing
+        #region class for testing
+        /// <summary>
+        /// Base class for test
+        /// </summary>
+        [ExcludeFromCodeCoverage]
+        public class BaseClassForTest
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="BaseClassForTest" /> class.
+            /// </summary>
+            public BaseClassForTest()
+            {
+                if (ConstructorCallback != null)
+                {
+                    ConstructorCallback();
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the action which will be called by constructor
+            /// </summary>
+            public static Action ConstructorCallback { get; set; }
+        }
+        #endregion class for testing
+
+        #region DefaultObjectFactoryWrapper
         /// <summary>
         /// Wrapper for default object factory
         /// </summary>
-        /// <typeparam name="TInterface"></typeparam>
+        /// <typeparam name="TBase">type of base class</typeparam>
+        /// <typeparam name="TInterface">type of interface</typeparam>
         [ExcludeFromCodeCoverage]
         public class ObjectFactoryForTest<TBase, TInterface> : DefaultObjectFactory<TBase, TInterface>
-            where TBase : class
+            where TBase : class, new()
             where TInterface : class
         {
             /// <summary>
             /// Wrapper for creating random name
             /// </summary>
             /// <param name="prefix">name prefix</param>
-            /// <returns></returns>
+            /// <returns>random name</returns>
             internal static string CreateNameForTest(string prefix)
             {
-                return CreateName(prefix);
+                return ObjectFactoryForTest<TBase, TInterface>.CreateName(prefix);
             }
 
             /// <summary>
@@ -169,55 +226,9 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Test
                     interfaceType = typeof(TInterface);
                 }
 
-                return CreateObjectConstructor(baseType, interfaceType);
+                return ObjectFactoryForTest<TBase, TInterface>.CreateObjectConstructor(baseType, interfaceType);
             }
         }
-
-        /// <summary>
-        /// Simple empty interface
-        /// </summary>
-        public interface ISimpleForForDefaultObjectFactoryUnitTest
-        {
-        }
-
-        /// <summary>
-        /// Composite interface which has multiple properties
-        /// </summary>
-        public interface ICompositeForDefaultObjectFactoryUnitTest
-        {
-            /// <summary>
-            /// Gets or sets integer
-            /// </summary>
-            int IntData { get; set; }
-
-            /// <summary>
-            /// Gets or sets string
-            /// </summary>
-            string StrData { get; set; }
-        }
-
-        /// <summary>
-        /// Base class for test
-        /// </summary>
-        [ExcludeFromCodeCoverage]
-        public class BaseClassForTest
-        {
-            /// <summary>
-            /// action when constructor get called
-            /// </summary>
-            public static Action ConstructorCallback { get; set; }
-
-            /// <summary>
-            /// Initializes a static instance of the <see cref="BaseClassForTest" /> class.
-            /// </summary>
-            public BaseClassForTest()
-            {
-                if (ConstructorCallback != null)
-                {
-                    ConstructorCallback();
-                }
-            }
-        }
-        #endregion types for testing
+        #endregion DefaultObjectFactoryWrapper
     }
 }

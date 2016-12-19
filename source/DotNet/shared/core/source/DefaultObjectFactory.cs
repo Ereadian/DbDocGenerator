@@ -20,7 +20,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
     /// <typeparam name="TBaseClass">type of base class</typeparam>
     /// <typeparam name="TInterface">Type of the object to create. It should be an interface</typeparam>
     public class DefaultObjectFactory<TBaseClass, TInterface> : IObjectFactory<TBaseClass, TInterface>
-        where TBaseClass : class
+        where TBaseClass : class, new()
         where TInterface : class
     {
         /// <summary>
@@ -29,7 +29,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         private static readonly ConstructorInfo TypeConstructorInformation;
 
         /// <summary>
-        /// Initializes a static instance of the <see cref="DefaultObjectFactory{TBaseClass,TInterface}" /> class.
+        /// Initializes static members of the <see cref="DefaultObjectFactory{TBaseClass, TInterface}" /> class.
         /// </summary>
         static DefaultObjectFactory()
         {
@@ -68,7 +68,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
             var builder = new StringBuilder();
             foreach (var ch in prefix)
             {
-                if (Char.IsLetterOrDigit(ch) || (ch == '_'))
+                if (char.IsLetterOrDigit(ch) || (ch == '_'))
                 {
                     builder.Append(ch);
                 }
@@ -124,7 +124,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <summary>
         /// Create default constructor
         /// </summary>
-        /// <param name="moduleBuilder">module builder</param>
+        /// <param name="typeBuilder">type builder</param>
         /// <param name="baseType">base type</param>
         /// <param name="interfaceType">type of interface to implement</param>
         /// <returns>default constructor builder</returns>
@@ -140,10 +140,10 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
                 throw new ArgumentException($"Could not found default constructor in type {baseType.FullName}, or the default constructor is not public");
             }
 
-            var ilGenerator = constructorBuilder.GetILGenerator();
-            ilGenerator.Emit(OpCodes.Ldarg_0);
-            ilGenerator.Emit(OpCodes.Call, baseConstructorInformation);
-            ilGenerator.Emit(OpCodes.Ret);
+            var ctorIlGenerator = constructorBuilder.GetILGenerator();
+            ctorIlGenerator.Emit(OpCodes.Ldarg_0);
+            ctorIlGenerator.Emit(OpCodes.Call, baseConstructorInformation);
+            ctorIlGenerator.Emit(OpCodes.Ret);
 
             return constructorBuilder;
         }
@@ -215,7 +215,6 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
             var methodBuilder = typeBuilder.DefineMethod(
                 methodReference.Name,
                 methodAttribute,
-                //CallingConventions.HasThis | CallingConventions.Standard,
                 methodReference.ReturnType,
                 parameterTypes);
 
