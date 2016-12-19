@@ -26,12 +26,12 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <summary>
         /// Constructor information
         /// </summary>
-        private static readonly ConstructorInfo TypeConstructorInformation;
+        private readonly ConstructorInfo TypeConstructorInformation;
 
         /// <summary>
-        /// Initializes static members of the <see cref="DefaultObjectFactory{TBaseClass, TInterface}" /> class.
+        /// Initializes a new instance of the <see cref="DefaultObjectFactory{TBaseClass, TInterface}" /> class.
         /// </summary>
-        static DefaultObjectFactory()
+        public DefaultObjectFactory()
         {
             try
             {

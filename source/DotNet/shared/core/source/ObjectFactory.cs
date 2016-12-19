@@ -9,14 +9,14 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
     /// <summary>
     /// Object factory
     /// </summary>
-    public static class ObjectFactory
+    public class ObjectFactory
     {
         /// <summary>
         /// Create class for a given interface
         /// </summary>
         /// <typeparam name="TInterface">type of the interface to implement</typeparam>
         /// <returns>instance which implements the interface</returns>
-        public static TInterface Create<TInterface>() where TInterface : class
+        public TInterface Create<TInterface>() where TInterface : class
         {
             return Create<object, TInterface>();
         }
@@ -27,7 +27,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <typeparam name="TBaseClass">type of base class</typeparam>
         /// <typeparam name="TInterface">type of the interface to implement</typeparam>
         /// <returns>instance which implements the interface</returns>
-        public static TInterface Create<TBaseClass, TInterface>() where TBaseClass : class, new() where TInterface : class
+        public TInterface Create<TBaseClass, TInterface>() where TBaseClass : class, new() where TInterface : class
         {
             return Singleton<DefaultObjectFactory<TBaseClass, TInterface>>.Instance.Create();
         }

@@ -31,6 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -67,6 +68,15 @@
     <Compile Include="..\..\..\shared\core\source\DefaultObjectFactory.cs">
       <Link>DefaultObjectFactory.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\shared\core\source\DefaultObjectResolverFactory.cs">
+      <Link>DefaultObjectResolverFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\EventAttribute.cs">
+      <Link>EventAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\Events.cs">
+      <Link>Events.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\shared\core\source\IColumn.cs">
       <Link>IColumn.cs</Link>
     </Compile>
@@ -85,17 +95,44 @@
     <Compile Include="..\..\..\shared\core\source\IDataType.cs">
       <Link>IDataType.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\shared\core\source\ILogger.cs">
+      <Link>ILogger.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\shared\core\source\IObjectFactory.cs">
       <Link>IObjectFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\IObjectResolver.cs">
+      <Link>IObjectResolver.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\IObjectResolverFactory.cs">
+      <Link>IObjectResolverFactory.cs</Link>
     </Compile>
     <Compile Include="..\..\..\shared\core\source\ITable.cs">
       <Link>ITable.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\shared\core\source\LogExtension.cs">
+      <Link>LogExtension.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\LogLevel.cs">
+      <Link>LogLevel.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\LogTrace.cs">
+      <Link>LogTrace.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\shared\core\source\ObjectFactory.cs">
       <Link>ObjectFactory.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\shared\core\source\ObjectResolver.cs">
+      <Link>ObjectResolver.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\ObjectResolverFactory.cs">
+      <Link>ObjectResolverFactory.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\shared\core\source\Singleton.cs">
       <Link>Singleton.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\Utility.cs">
+      <Link>Utility.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
