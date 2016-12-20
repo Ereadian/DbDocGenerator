@@ -16,28 +16,28 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
     public abstract class DatabaseOperation
     {
         /// <summary>
-        /// database connection string
-        /// </summary>
-        private readonly string connectionString;
-
-        /// <summary>
-        /// database configuration
-        /// </summary>
-        private readonly IDatabaseConfiguration configuration;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseOperation" /> class.
         /// </summary>
         /// <param name="connectionString">connection string</param>
         /// <param name="configuration">database configuration</param>
         public DatabaseOperation(string connectionString, IDatabaseConfiguration configuration)
         {
-            this.connectionString = connectionString;
-            this.configuration = configuration;
+            this.ConnectionString = connectionString;
+            this.Configuration = configuration;
         }
 
         /// <summary>
-        /// Create connections string
+        /// Gets database connection string
+        /// </summary>
+        protected string ConnectionString { get; private set; }
+
+        /// <summary>
+        /// Gets database configuration
+        /// </summary>
+        protected IDatabaseConfiguration Configuration { get; private set; }
+
+        /// <summary>
+        /// Create connections instance
         /// </summary>
         /// <returns>database connection</returns>
         public abstract IDbConnection CreateConnection();
@@ -51,14 +51,35 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         public abstract void AddParameter(IDbCommand command, string parameterName, object parameterValue);
 
         /// <summary>
+        /// Analyze database 
+        /// </summary>
+        /// <returns>database schema</returns>
+        public abstract IDatabaseAnalysisResult Analyze();
+
+        /// <summary>
         /// Execute reader
         /// </summary>
         /// <param name="commandName">command name</param>
         /// <param name="parameters">command parameters</param>
         /// <returns>data reader</returns>
-        public virtual IDataReader ExecuteReader(string commandName, IReadOnlyDictionary<string, object> parameters = null)
+        public virtual T ExecuteReader<T>(
+            string commandName, 
+            Func<IDataReader, T> readData, 
+            IReadOnlyDictionary<string, object> parameters = null)
         {
-            return this.Execute(commandName, parameters, command => command.ExecuteReader());
+            return this.Execute(
+                commandName, 
+                parameters, 
+                command =>
+                {
+                    T data;
+                    using (var reader = command.ExecuteReader())
+                    {
+                        data = readData(reader);
+                    }
+
+                    return data;
+                });
         }
 
         /// <summary>
@@ -89,7 +110,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
             {
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = this.configuration.GetCommand(commandName);
+                    command.CommandText = this.Configuration.GetCommand(commandName);
                     command.CommandType = CommandType.Text;
 
                     if (!parameters.IsReadOnlyNullOrEmpty())

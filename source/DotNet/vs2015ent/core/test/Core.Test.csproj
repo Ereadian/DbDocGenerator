@@ -75,9 +75,9 @@
       <Project>{a43c5641-d2ae-4e56-aadf-42f194963946}</Project>
       <Name>test</Name>
     </ProjectReference>
-    <ProjectReference Include="..\source\source.csproj">
+    <ProjectReference Include="..\source\Core.Source.csproj">
       <Project>{05a7d929-1ee5-4516-ad4d-cc683788f8eb}</Project>
-      <Name>source</Name>
+      <Name>Core.Source</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

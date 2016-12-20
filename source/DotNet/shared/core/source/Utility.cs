@@ -29,7 +29,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
             T instance = null;
             try
             {
-                if (string.IsNullOrWhiteSpace(typeName))
+                if (!string.IsNullOrWhiteSpace(typeName))
                 {
                     var type = Type.GetType(typeName);
                     if (type != null)

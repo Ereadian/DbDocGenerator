@@ -14,6 +14,12 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
     public interface ITable
     {
         /// <summary>
+        /// Table display name
+        /// </summary>
+        /// <example>[dbo].[Users]</example>
+        string DisplayName { get; set; }
+
+        /// <summary>
         /// Gets or sets Schema Name (for example, "DBO")
         /// </summary>
         string SchemaName { get; set; }

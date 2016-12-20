@@ -37,7 +37,8 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         protected static readonly IReadOnlyDictionary<Type, Type> DefaultResolvers = new Dictionary<Type, Type>()
         {
             { typeof(ILogger), typeof(LogTrace) },
-            { typeof(IDatabaseConfigurationProvider), typeof(IDatabaseConfigurationProvider) },
+            { typeof(IDatabaseConfigurationProvider), typeof(DatabaseConfigurationProvider) },
+            { typeof(IDatabaseAnalysisResult), null },
             { typeof(ITable), null },
             { typeof(IColumn), null },
         };

@@ -128,6 +128,9 @@
     <Compile Include="..\..\..\shared\core\source\Singleton.cs">
       <Link>Singleton.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\shared\core\source\SqlServer\SqlServerDatabaseOperation.cs">
+      <Link>SqlServer\SqlServerDatabaseOperation.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\shared\core\source\Utility.cs">
       <Link>Utility.cs</Link>
     </Compile>
@@ -138,9 +141,7 @@
       <Link>configurations.xml</Link>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="SqlServer\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

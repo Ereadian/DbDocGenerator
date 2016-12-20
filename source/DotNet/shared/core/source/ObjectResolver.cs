@@ -49,7 +49,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <returns>resolved object</returns>
         public T Resolve()
         {
-            return this.instance == null ? this.instance.Value : this.creator.Create();
+            return this.instance != null ? this.instance.Value : this.creator.Create();
         }
     }
 }
