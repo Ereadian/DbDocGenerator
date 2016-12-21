@@ -107,6 +107,9 @@
     <Compile Include="..\..\..\shared\core\source\IObjectResolverFactory.cs">
       <Link>IObjectResolverFactory.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\shared\core\source\IRoutine.cs">
+      <Link>IRoutine.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\shared\core\source\ITable.cs">
       <Link>ITable.cs</Link>
     </Compile>

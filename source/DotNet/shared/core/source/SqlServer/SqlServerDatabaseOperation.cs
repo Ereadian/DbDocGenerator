@@ -73,6 +73,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
             this.UpdateColumns(result.Tables);
             this.UpdateTablePrimaryKeys(result.Tables);
             this.UpdateTableForeignKeys(result.Tables);
+            var routines = this.GetRoutines(result);
             return result;
         }
         #endregion Implement base class
@@ -317,6 +318,63 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                     return null;
                 });
         }
+
+        /// <summary>
+        /// Get routines like stored procedures and functions
+        /// </summary>
+        /// <returns>routine dictionary</returns>
+        protected IReadOnlyDictionary<string, IRoutine> GetRoutines(IDatabaseAnalysisResult result)
+        {
+            var routineCollection = this.ExecuteReader(
+                "GetRoutines",
+                reader =>
+                {
+                    var routines = new Dictionary<string, IRoutine>(StringComparer.OrdinalIgnoreCase);
+                    var resolver = this.ResolverFactory.GetResolver<IRoutine>();
+                    while (reader.Read())
+                    {
+                        var routine = resolver.Resolve();
+                        routine.SchemaName = GetData<string>(reader, "ROUTINE_SCHEMA");
+                        routine.RoutineName = GetData<string>(reader, "ROUTINE_NAME");
+                        routine.RoutineType = GetData<string>(reader, "ROUTINE_TYPE");
+                        routine.DataTypeName = GetData<string>(reader, "DATA_TYPE");
+                        routine.StringSize = GetData<int?>(reader, "CHARACTER_MAXIMUM_LENGTH");
+                        routine.NumericPrecision = GetData<int?>(reader, "NUMERIC_PRECISION");
+                        routine.NumericScale = GetData<int?>(reader, "NUMERIC_SCALE");
+                        routine.SoruceCode = GetData<string>(reader, "ROUTINE_DEFINITION");
+                        routine.DisplayName = GetDisplayName(routine.SchemaName, routine.RoutineName);
+                        routines.Add(routine.DisplayName, routine);
+                    }
+                    return routines;
+                });
+
+            var collection = new Dictionary<string, Dictionary<string, IRoutine>>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, IRoutine> currentRoutines;
+            foreach (var pair in routineCollection)
+            {
+                var typeName = pair.Value.RoutineType;
+                if (!collection.TryGetValue(typeName, out currentRoutines))
+                {
+                    currentRoutines = new Dictionary<string, IRoutine>(StringComparer.OrdinalIgnoreCase);
+                    collection.Add(typeName, currentRoutines);
+                }
+
+                currentRoutines.Add(pair.Key, pair.Value);
+            }
+
+            if (collection.TryGetValue("PROCEDURE", out currentRoutines))
+            {
+                result.StoredProcedures = currentRoutines;
+            }
+
+            if (collection.TryGetValue("FUNCTION", out currentRoutines))
+            {
+                result.Functions = currentRoutines;
+            }
+
+            return routineCollection;
+        }
+
 
         /// <summary>
         /// Get data from data reader

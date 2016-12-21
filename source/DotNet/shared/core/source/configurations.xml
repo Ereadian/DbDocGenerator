@@ -55,5 +55,19 @@
 	        ORDER BY C.[TABLE_SCHEMA], C.[TABLE_NAME]
       ]]>
     </command>
+    <command name="GetRoutines">
+      <![CDATA[
+        SELECT 
+	        [ROUTINE_SCHEMA], 
+	        [ROUTINE_NAME], 
+	        [ROUTINE_TYPE], 
+	        [ROUTINE_DEFINITION], 
+	        [DATA_TYPE] ,
+	        [CHARACTER_MAXIMUM_LENGTH],
+	        [NUMERIC_PRECISION],
+	        [NUMERIC_SCALE]
+	        FROM [INFORMATION_SCHEMA].[ROUTINES] 
+      ]]>
+    </command>
   </provider>
 </configuration>

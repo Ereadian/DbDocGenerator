@@ -17,5 +17,15 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// Gets or sets tables
         /// </summary>
         IReadOnlyDictionary<string, ITable> Tables { get; set; }
+
+        /// <summary>
+        /// Gets or sets stored procedures
+        /// </summary>
+        IReadOnlyDictionary<string, IRoutine> StoredProcedures { get; set; }
+
+        /// <summary>
+        /// Gets or sets functions
+        /// </summary>
+        IReadOnlyDictionary<string, IRoutine> Functions { get; set; }
     }
 }
