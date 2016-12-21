@@ -38,5 +38,10 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// Gets or sets primary key
         /// </summary>
         IConstraint PrimaryKey { get; set; }
+
+        /// <summary>
+        /// Gets or sets foreign keys
+        /// </summary>
+        IReadOnlyList<IConstraint> ForeignKeys { get; set; }
     }
 }

@@ -36,6 +36,6 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <summary>
         /// Gets or sets constraint columns
         /// </summary>
-        IReadOnlyList<IColumn> Columns { get; set; }
+        IReadOnlyList<KeyValuePair<IColumn, IColumn>> Columns { get; set; }
     }
 }

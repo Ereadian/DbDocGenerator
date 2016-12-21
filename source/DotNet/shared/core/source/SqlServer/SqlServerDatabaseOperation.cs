@@ -72,6 +72,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
             result.Tables = this.GetTables();
             this.UpdateColumns(result.Tables);
             this.UpdateTablePrimaryKeys(result.Tables);
+            this.UpdateTableForeignKeys(result.Tables);
             return result;
         }
         #endregion Implement base class
@@ -165,7 +166,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                 reader =>
                 {
                     ITable table = null;
-                    List<IColumn> columns = null;
+                    List<KeyValuePair<IColumn, IColumn>> columns = null;
                     var constraintResolver = this.ResolverFactory.GetResolver<IConstraint>();
                     while (reader.Read())
                     {
@@ -197,7 +198,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                             constraint.DisplayName = constraintDisplayName;
                             constraint.SchemaName = constraintSchema;
                             constraint.ConstraintName = constraintName;
-                            columns = new List<IColumn>();
+                            columns = new List<KeyValuePair<IColumn, IColumn>>();
                             constraint.Columns = columns;
                         }
 
@@ -213,8 +214,106 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                             throw new ApplicationException(errorMessage);
                         }
 
-                        columns.Add(column);
+                        columns.Add(new KeyValuePair<IColumn, IColumn>(column, null));
                     }
+                    return null;
+                });
+        }
+
+        /// <summary>
+        /// Update table primary key
+        /// </summary>
+        /// <param name="tables">table collection</param>
+        protected void UpdateTableForeignKeys(IReadOnlyDictionary<string, ITable> tables)
+        {
+            this.ExecuteReader<object>(
+                "GetForeignKeys",
+                reader =>
+                {
+                    ITable foreignKeyTable = null;
+                    List<IConstraint> foreignKeys = null;
+                    var constraintResolver = this.ResolverFactory.GetResolver<IConstraint>();
+                    while (reader.Read())
+                    {
+                        var foreignKeyTableSchema = GetData<string>(reader, "FK_TABLE_SCHEMA");
+                        var foreignKeyTableName = GetData<string>(reader, "FK_TABLE_NAME");
+                        var constraintSchema = GetData<string>(reader, "CONSTRAINT_SCHEMA");
+                        var constraintName = GetData<string>(reader, "CONSTRAINT_NAME");
+                        var constraintDisplayName = GetDisplayName(constraintSchema, constraintName);
+
+                        if ((foreignKeyTable == null)
+                            || !foreignKeyTable.SchemaName.Equals(foreignKeyTableSchema, StringComparison.OrdinalIgnoreCase)
+                            || !foreignKeyTable.TableName.Equals(foreignKeyTableName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var tableDisplayName = GetDisplayName(foreignKeyTableSchema, foreignKeyTableName);
+                            if (!tables.TryGetValue(tableDisplayName, out foreignKeyTable))
+                            {
+                                string errorMessage = string.Format(
+                                    CultureInfo.InvariantCulture,
+                                    "Could not find foreign key table \"{0}\" for constraint \"{1}\".",
+                                    tableDisplayName,
+                                    constraintDisplayName);
+                                throw new ApplicationException(errorMessage);
+                            }
+
+                            foreignKeys = new List<IConstraint>();
+                            foreignKeyTable.ForeignKeys = foreignKeys;
+                        }
+
+                        var constraint = constraintResolver.Resolve();
+                        constraint.Table = foreignKeyTable;
+                        constraint.DisplayName = constraintDisplayName;
+                        constraint.SchemaName = constraintSchema;
+                        constraint.ConstraintName = constraintName;
+
+                        var foreignKeyColumnName = GetData<string>(reader, "FK_COLUMN_NAME");
+                        IColumn foreignKeyColumn = foreignKeyTable.Columns.FirstOrDefault(c => c.Name == foreignKeyColumnName);
+                        if (foreignKeyColumn == null)
+                        {
+                            var errorMessage = string.Format(
+                                CultureInfo.InvariantCulture,
+                                "Could not find foreign key column \"{0}\" in table \"{1}\" for foreign key constraint \"{2}\".",
+                                foreignKeyColumnName,
+                                foreignKeyTable.DisplayName,
+                                constraintDisplayName);
+                            throw new ApplicationException(errorMessage);
+                        }
+
+                        var primaryKeyTableSchema = GetData<string>(reader, "PK_TABLE_SCHEMA");
+                        var primaryKeyTableName = GetData<string>(reader, "PK_TABLE_NAME");
+                        var primaryKeyColumnName = GetData<string>(reader, "PK_COLUMN_NAME");
+                        var primaryKeyTableDisplayName = GetDisplayName(primaryKeyTableSchema, primaryKeyTableName);
+                        ITable primaryKeyTable;
+                        if (!tables.TryGetValue(primaryKeyTableDisplayName, out primaryKeyTable))
+                        {
+                            string errorMessage = string.Format(
+                                CultureInfo.InvariantCulture,
+                                "Could not find primary key table \"{0}\" for constraint \"{1}\".",
+                                primaryKeyTableDisplayName,
+                                constraintDisplayName);
+                            throw new ApplicationException(errorMessage);
+                        }
+
+                        IColumn primaryKeyColumn = primaryKeyTable.Columns.FirstOrDefault(c => c.Name == primaryKeyColumnName);
+                        if (primaryKeyColumn == null)
+                        {
+                            var errorMessage = string.Format(
+                                CultureInfo.InvariantCulture,
+                                "Could not find primary key column \"{0}\" in table \"{1}\" for foreign key constraint \"{2}\".",
+                                primaryKeyColumnName,
+                                primaryKeyTable.DisplayName,
+                                constraintDisplayName);
+                            throw new ApplicationException(errorMessage);
+                        }
+
+                        constraint.Columns = new List<KeyValuePair<IColumn, IColumn>>()
+                        {
+                            new KeyValuePair<IColumn, IColumn>(foreignKeyColumn, primaryKeyColumn)
+                        };
+
+                        foreignKeys.Add(constraint);
+                    }
+
                     return null;
                 });
         }
