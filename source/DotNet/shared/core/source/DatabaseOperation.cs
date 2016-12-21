@@ -69,7 +69,6 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         {
             return this.Execute(
                 commandName, 
-                parameters, 
                 command =>
                 {
                     T data;
@@ -79,7 +78,8 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
                     }
 
                     return data;
-                });
+                },
+                parameters);
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <returns>scalar value</returns>
         public object ExecuteScalar(string commandName, IReadOnlyDictionary<string, object> parameters = null)
         {
-            object value = this.Execute(commandName, parameters, command => command.ExecuteScalar());
+            object value = this.Execute(commandName, command => command.ExecuteScalar(), parameters);
             return value == DBNull.Value ? null : value;
         }
 
@@ -99,10 +99,10 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// </summary>
         /// <typeparam name="T">type of return value</typeparam>
         /// <param name="commandName">command name</param>
-        /// <param name="parameters">command parameters</param>
         /// <param name="func">function for command</param>
+        /// <param name="parameters">command parameters</param>
         /// <returns>return value</returns>
-        protected T Execute<T>(string commandName, IReadOnlyDictionary<string, object> parameters, Func<IDbCommand, T> func)
+        public T Execute<T>(string commandName, Func<IDbCommand, T> func, IReadOnlyDictionary<string, object> parameters = null)
         {
             T value;
 

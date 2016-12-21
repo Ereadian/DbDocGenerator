@@ -80,6 +80,9 @@
     <Compile Include="..\..\..\shared\core\source\IColumn.cs">
       <Link>IColumn.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\shared\core\source\IConstraint.cs">
+      <Link>IConstraint.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\shared\core\source\IDatabaseAnalysisResult.cs">
       <Link>IDatabaseAnalysisResult.cs</Link>
     </Compile>

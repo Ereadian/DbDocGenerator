@@ -1,7 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <configuration>
   <provider name="MicrosoftSqlServer">
+    <type name="BIT" />
     <type name="INT" />
+    <type name="SMALLINT" />
     <type name="BIGINT" />
     <type name="UNIQUEIDENTIFIER" />
     <type name="CHAR" size="required" />
@@ -16,6 +18,22 @@
     <command name="GetTables">
       <![CDATA[
         SELECT [TABLE_CATALOG], [TABLE_SCHEMA], [TABLE_NAME] FROM [INFORMATION_SCHEMA].[TABLES] WHERE [TABLE_TYPE] = 'BASE TABLE'
+      ]]>
+    </command>
+    <command name="GetColumns">
+      <![CDATA[
+        SELECT [TABLE_SCHEMA], [TABLE_NAME], [COLUMN_NAME], [COLUMN_DEFAULT], [IS_NULLABLE], [DATA_TYPE], [CHARACTER_MAXIMUM_LENGTH], [NUMERIC_PRECISION], [NUMERIC_SCALE]
+	        FROM [INFORMATION_SCHEMA].[COLUMNS] 
+	        ORDER BY [TABLE_SCHEMA], [TABLE_NAME], [ORDINAL_POSITION]
+      ]]>
+    </command>
+    <command name="GetPrimaryKeys">
+      <![CDATA[
+        SELECT U.[TABLE_SCHEMA], U.[TABLE_NAME], U.[CONSTRAINT_SCHEMA], U.[CONSTRAINT_NAME], U.[COLUMN_NAME]
+	        FROM [INFORMATION_SCHEMA].[KEY_COLUMN_USAGE] U
+	        INNER JOIN [INFORMATION_SCHEMA].[TABLE_CONSTRAINTS] C ON (C.[CONSTRAINT_NAME] = U.[CONSTRAINT_NAME]) AND C.[CONSTRAINT_SCHEMA] = U.[CONSTRAINT_SCHEMA]
+	        WHERE C.[CONSTRAINT_TYPE]='PRIMARY KEY'
+	        ORDER BY U.[TABLE_SCHEMA], U.[TABLE_NAME], U.[ORDINAL_POSITION]
       ]]>
     </command>
   </provider>

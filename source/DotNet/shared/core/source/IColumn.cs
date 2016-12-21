@@ -22,13 +22,33 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         string Name { get; set; }
 
         /// <summary>
-        /// Gets or sets type of the column
+        /// Gets or sets name of column data type
         /// </summary>
-        IDataType DataType { get; set; }
+        string DataTypeName { get; set; }
 
         /// <summary>
-        /// Gets or sets the size of column data
+        /// Gets or sets character size
         /// </summary>
-        int? DataSize { get; set; }
+        int? StringSize { get; set; }
+
+        /// <summary>
+        /// Gets or sets the size of column numeric precision
+        /// </summary>
+        int? NumericPrecision { get; set; }
+
+        /// <summary>
+        /// Gets or sets the size of column numeric scale
+        /// </summary>
+        int? NumericScale { get; set; }
+
+        /// <summary>
+        /// Gets the flag that allow column value be null
+        /// </summary>
+        bool IsNullable { get; set; }
+
+        /// <summary>
+        /// Gets default column value
+        /// </summary>
+        string DefaultValue { get; set; }
     }
 }

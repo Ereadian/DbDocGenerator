@@ -1,5 +1,5 @@
 ﻿//------------------------------------------------------------------------------------------------------------------------------------------ 
-// <copyright file="ITable.cs" company="Ereadian"> 
+// <copyright file="IConstraint.cs" company="Ereadian"> 
 //     Copyright (c) Ereadian.  All rights reserved. 
 // </copyright> 
 //------------------------------------------------------------------------------------------------------------------------------------------ 
@@ -9,34 +9,33 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
     using System.Collections.Generic;
 
     /// <summary>
-    /// Table definition interface
+    /// Table constraint
     /// </summary>
-    public interface ITable
+    public interface IConstraint
     {
         /// <summary>
-        /// Table display name
+        /// Gets or set the table the constraint belongs to
         /// </summary>
-        /// <example>[dbo].[Users]</example>
+        ITable Table { get; set; }
+
+        /// <summary>
+        /// Gets or sets constraint display name
+        /// </summary>
         string DisplayName { get; set; }
 
         /// <summary>
-        /// Gets or sets Schema Name (for example, "DBO")
+        /// Gets or sets constraint schema name
         /// </summary>
         string SchemaName { get; set; }
 
         /// <summary>
-        /// Gets or sets Table Name
+        /// Gets or sets constraint name
         /// </summary>
-        string TableName { get; set; }
+        string ConstraintName { get; set; }
 
         /// <summary>
-        /// Gets or sets columns
+        /// Gets or sets constraint columns
         /// </summary>
         IReadOnlyList<IColumn> Columns { get; set; }
-
-        /// <summary>
-        /// Gets or sets primary key
-        /// </summary>
-        IConstraint PrimaryKey { get; set; }
     }
 }

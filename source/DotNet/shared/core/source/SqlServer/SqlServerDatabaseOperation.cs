@@ -70,10 +70,16 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
         {
             var result = this.ResolverFactory.GetResolver<IDatabaseAnalysisResult>().Resolve();
             result.Tables = this.GetTables();
+            this.UpdateColumns(result.Tables);
+            this.UpdateTablePrimaryKeys(result.Tables);
             return result;
         }
         #endregion Implement base class
 
+        /// <summary>
+        /// Get tables
+        /// </summary>
+        /// <returns>table collection</returns>
         protected IReadOnlyDictionary<string, ITable> GetTables()
         {
             return this.ExecuteReader(
@@ -87,12 +93,181 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                         var table = tableResolver.Resolve();
                         table.SchemaName = reader["TABLE_SCHEMA"] as string;
                         table.TableName = reader["TABLE_NAME"] as string;
-                        table.DisplayName = string.Format(CultureInfo.InvariantCulture, "[{0}].[{1}]", table.SchemaName, table.TableName);
+                        table.DisplayName = GetDisplayName(table.SchemaName, table.TableName);
                         tables.Add(table.DisplayName, table);
                     }
 
                     return tables;
                 });
+        }
+
+        /// <summary>
+        /// Update table by add columns
+        /// </summary>
+        /// <param name="tables">table collection</param>
+        protected void UpdateColumns(IReadOnlyDictionary<string, ITable> tables)
+        {
+            this.ExecuteReader<object>(
+                "GetColumns",
+                reader =>
+                {
+                    ITable table = null;
+                    List<IColumn> columns = null;
+                    var columnResolver = this.ResolverFactory.GetResolver<IColumn>();
+                    while (reader.Read())
+                    {
+                        var tableSchema = GetData<string>(reader, "TABLE_SCHEMA");
+                        var tableName = GetData<string>(reader, "TABLE_NAME");
+                        var columnName = GetData<string>(reader, "COLUMN_NAME"); ;
+
+                        if ((table == null) 
+                            || !table.SchemaName.Equals(tableSchema, StringComparison.OrdinalIgnoreCase) 
+                            || !table.TableName.Equals(tableName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var tableDisplayName = GetDisplayName(tableSchema, tableName);
+                            if (!tables.TryGetValue(tableDisplayName, out table))
+                            {
+                                string errorMessage = string.Format(
+                                    CultureInfo.InvariantCulture,
+                                    "Could not find table \"{0}\" for column \"{1}\".",
+                                    tableDisplayName,
+                                    columnName);
+                                throw new ApplicationException(errorMessage);
+                            }
+
+                            columns = new List<IColumn>();
+                            table.Columns = columns;
+                        }
+
+                        var column = columnResolver.Resolve();
+                        column.Table = table;
+                        column.Name = columnName;
+                        column.DataTypeName = GetData<string>(reader, "DATA_TYPE");
+                        column.StringSize = GetData<int?>(reader, "CHARACTER_MAXIMUM_LENGTH");
+                        column.NumericPrecision = GetData<int?>(reader, "NUMERIC_PRECISION");
+                        column.NumericScale = GetData<int?>(reader, "NUMERIC_SCALE");
+                        column.IsNullable = GetData<string>(reader, "IS_NULLABLE").Equals("YES", StringComparison.OrdinalIgnoreCase);
+                        column.DefaultValue = GetData<string>(reader, "COLUMN_DEFAULT");
+                        columns.Add(column);
+                    }
+                    return null;
+                });
+        }
+
+        /// <summary>
+        /// Update table primary key
+        /// </summary>
+        /// <param name="tables">table collection</param>
+        protected void UpdateTablePrimaryKeys(IReadOnlyDictionary<string, ITable> tables)
+        {
+            this.ExecuteReader<object>(
+                "GetPrimaryKeys",
+                reader =>
+                {
+                    ITable table = null;
+                    List<IColumn> columns = null;
+                    var constraintResolver = this.ResolverFactory.GetResolver<IConstraint>();
+                    while (reader.Read())
+                    {
+                        var tableSchema = GetData<string>(reader, "TABLE_SCHEMA");
+                        var tableName = GetData<string>(reader, "TABLE_NAME");
+                        var constraintSchema = GetData<string>(reader, "CONSTRAINT_SCHEMA");
+                        var constraintName = GetData<string>(reader, "CONSTRAINT_NAME");
+                        var constraintDisplayName = GetDisplayName(constraintSchema, constraintName);
+                        var columnName = GetData<string>(reader, "COLUMN_NAME");
+
+                        if ((table == null)
+                            || !table.SchemaName.Equals(tableSchema, StringComparison.OrdinalIgnoreCase)
+                            || !table.TableName.Equals(tableName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var tableDisplayName = GetDisplayName(tableSchema, tableName);
+                            if (!tables.TryGetValue(tableDisplayName, out table))
+                            {
+                                string errorMessage = string.Format(
+                                    CultureInfo.InvariantCulture,
+                                    "Could not find table \"{0}\" for constraint \"{1}\".",
+                                    tableDisplayName,
+                                    constraintDisplayName);
+                                throw new ApplicationException(errorMessage);
+                            }
+
+                            var constraint = constraintResolver.Resolve();
+                            table.PrimaryKey = constraint;
+                            constraint.Table = table;
+                            constraint.DisplayName = constraintDisplayName;
+                            constraint.SchemaName = constraintSchema;
+                            constraint.ConstraintName = constraintName;
+                            columns = new List<IColumn>();
+                            constraint.Columns = columns;
+                        }
+
+                        IColumn column = table.Columns.FirstOrDefault(c => c.Name == columnName);
+                        if (column == null)
+                        {
+                            var errorMessage = string.Format(
+                                CultureInfo.InvariantCulture,
+                                "Could not find column \"{0}\" in table \"{1}\" for primary key constraint \"{2}\".",
+                                columnName,
+                                table.DisplayName,
+                                constraintDisplayName);
+                            throw new ApplicationException(errorMessage);
+                        }
+
+                        columns.Add(column);
+                    }
+                    return null;
+                });
+        }
+
+        /// <summary>
+        /// Get data from data reader
+        /// </summary>
+        /// <typeparam name="T">type to convert</typeparam>
+        /// <param name="reader">data reader</param>
+        /// <param name="columnName">column name</param>
+        /// <returns>column value</returns>
+        private static T GetData<T>(IDataReader reader, string columnName)
+        {
+            var data = reader[columnName];
+            if ((data == null) || (data == DBNull.Value))
+            {
+                return default(T);
+            }
+
+            var type = typeof(T);
+            if (type.IsGenericType)
+            {
+                type = type.GetGenericArguments()[0];
+            }
+
+            return (T)ChangeType(data, type);
+        }
+
+        /// <summary>
+        /// Change type
+        /// </summary>
+        /// <param name="value">value to change</param>
+        /// <param name="conversionType">target type</param>
+        /// <returns>data with new type (if type is different) or same value if target type is compatible</returns>
+        private static object ChangeType(object value, Type conversionType)
+        {
+            if (conversionType.IsAssignableFrom(value.GetType()))
+            {
+                return value;
+            }
+
+            return Convert.ChangeType(value, conversionType);
+        }
+
+        /// <summary>
+        /// Get display name
+        /// </summary>
+        /// <param name="schemaName">object schema name</param>
+        /// <param name="tableName">object name</param>
+        /// <returns>display name</returns>
+        private static string GetDisplayName(string schemaName, string tableName)
+        {
+            return string.Format(CultureInfo.InvariantCulture, "[{0}].[{1}]", schemaName, tableName);
         }
     }
 }

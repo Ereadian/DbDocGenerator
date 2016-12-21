@@ -41,6 +41,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
             { typeof(IDatabaseAnalysisResult), null },
             { typeof(ITable), null },
             { typeof(IColumn), null },
+            { typeof(IConstraint), null },
         };
 
         /// <summary>
