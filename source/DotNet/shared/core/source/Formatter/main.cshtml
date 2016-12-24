@@ -31,6 +31,11 @@
         {
             functions = Model.Functions.Values.OrderBy(f => f.DisplayName).ToArray();
         }
+        IRoutine[] procedures = null;
+        if (!Model.StoredProcedures.IsReadOnlyNullOrEmpty())
+        {
+            procedures = Model.StoredProcedures.Values.OrderBy(f => f.DisplayName).ToArray();
+        }
     }
     <h1>@Model.Title</h1>
     <h2>Table Of Content</h2>
@@ -38,15 +43,16 @@
         <tr>
         @if (tables != null)
         {
-            <th>Tables</th>
+            <th>Tables (@tables.Length)</th>
         }
         @if (functions != null)
         {
-            <th>Functions</th>
+            var cnt = functions.Length;
+            <th>Functions (@cnt)</th>
         }
-        @if (!Model.StoredProcedures.IsReadOnlyNullOrEmpty())
+        @if (procedures != null)
         {
-            <th>Stored Proceures</th>
+            <th>Stored Proceures (@procedures.Length))</th>
         }
         </tr>
         <tr>
@@ -70,11 +76,10 @@
             @:</td>
         }
 
-        @if (Model.StoredProcedures.Count > 0)
+        @if (procedures != null)
         {
-            var list = Model.StoredProcedures.Values.OrderBy(p => p.DisplayName);
             @:<td>
-            @foreach (var proc in list)
+            @foreach (var proc in procedures)
             {
                 @:<div>@proc.DisplayName</div>
             }
