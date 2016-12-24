@@ -40,8 +40,21 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         IConstraint PrimaryKey { get; set; }
 
         /// <summary>
+        /// Gets or sets table indexes
+        /// </summary>
+        IReadOnlyList<IIndex> Indexes { get; set; }
+
+        /// <summary>
         /// Gets or sets foreign keys
         /// </summary>
         IReadOnlyList<IConstraint> ForeignKeys { get; set; }
+
+        /// <summary>
+        /// referenced by entities
+        /// </summary>
+        /// <remarks>
+        /// key is [type][schema][name]. for example, fn.dbo.fnGetUser.
+        /// </remarks>
+        SortedList<string, IReference> References { get; set; }
     }
 }

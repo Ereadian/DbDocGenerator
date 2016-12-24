@@ -1,5 +1,5 @@
 ﻿//------------------------------------------------------------------------------------------------------------------------------------------ 
-// <copyright file="CollectionExtensions.cs" company="Ereadian"> 
+// <copyright file="SqlServerDatabaseOperation.cs" company="Ereadian"> 
 //     Copyright (c) Ereadian.  All rights reserved. 
 // </copyright> 
 //------------------------------------------------------------------------------------------------------------------------------------------ 
@@ -9,20 +9,36 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using System.Data.SqlClient;
     using System.Globalization;
+    using System.Linq;
 
+    /// <summary>
+    /// SQL server database operation
+    /// </summary>
     public class SqlServerDatabaseOperation : DatabaseOperation
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseOperation" /> class.
+        /// Table short type name in sys.objects
+        /// </summary>
+        private const string TableTypeShortName = "U";
+
+        /// <summary>
+        /// Stored procedure short type name in sys.objects
+        /// </summary>
+        private const string ProcedureTypeShortName = "P";
+
+        /// <summary>
+        /// Function short type name in sys.objects
+        /// </summary>
+        private const string FunctionTypeShortName = "FN";
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SqlServerDatabaseOperation" /> class.
         /// </summary>
         /// <param name="connectionString">connection string</param>
         /// <param name="configuration">database configuration</param>
-        public SqlServerDatabaseOperation(string connectionString, IDatabaseConfiguration configuration) 
+        public SqlServerDatabaseOperation(string connectionString, IDatabaseConfiguration configuration)
             : base(connectionString, configuration)
         {
         }
@@ -73,7 +89,10 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
             this.UpdateColumns(result.Tables);
             this.UpdateTablePrimaryKeys(result.Tables);
             this.UpdateTableForeignKeys(result.Tables);
+            this.UpdateIndexes(result.Tables);
             var routines = this.GetRoutines(result);
+            this.UpdateRoutineParameters(routines);
+            this.UpdateReferences(result, routines);
             return result;
         }
         #endregion Implement base class
@@ -120,10 +139,10 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                     {
                         var tableSchema = GetData<string>(reader, "TABLE_SCHEMA");
                         var tableName = GetData<string>(reader, "TABLE_NAME");
-                        var columnName = GetData<string>(reader, "COLUMN_NAME"); ;
+                        var columnName = GetData<string>(reader, "COLUMN_NAME");
 
-                        if ((table == null) 
-                            || !table.SchemaName.Equals(tableSchema, StringComparison.OrdinalIgnoreCase) 
+                        if ((table == null)
+                            || !table.SchemaName.Equals(tableSchema, StringComparison.OrdinalIgnoreCase)
                             || !table.TableName.Equals(tableName, StringComparison.OrdinalIgnoreCase))
                         {
                             var tableDisplayName = GetDisplayName(tableSchema, tableName);
@@ -152,6 +171,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                         column.DefaultValue = GetData<string>(reader, "COLUMN_DEFAULT");
                         columns.Add(column);
                     }
+
                     return null;
                 });
         }
@@ -217,6 +237,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
 
                         columns.Add(new KeyValuePair<IColumn, IColumn>(column, null));
                     }
+
                     return null;
                 });
         }
@@ -262,7 +283,6 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                         }
 
                         var constraint = constraintResolver.Resolve();
-                        constraint.Table = foreignKeyTable;
                         constraint.DisplayName = constraintDisplayName;
                         constraint.SchemaName = constraintSchema;
                         constraint.ConstraintName = constraintName;
@@ -295,6 +315,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                             throw new ApplicationException(errorMessage);
                         }
 
+                        constraint.Table = primaryKeyTable;
                         IColumn primaryKeyColumn = primaryKeyTable.Columns.FirstOrDefault(c => c.Name == primaryKeyColumnName);
                         if (primaryKeyColumn == null)
                         {
@@ -320,8 +341,85 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
         }
 
         /// <summary>
+        /// Update table index information
+        /// </summary>
+        /// <param name="tables">table collection</param>
+        protected void UpdateIndexes(IReadOnlyDictionary<string, ITable> tables)
+        {
+            this.ExecuteReader<object>(
+                "GetIndexes",
+                reader =>
+                {
+                    ITable table = null;
+                    List<IIndex> indexes = null;
+                    IIndex index = null;
+                    List<IColumn> columns = null;
+                    var indexResolver = this.ResolverFactory.GetResolver<IIndex>();
+                    while (reader.Read())
+                    {
+                        var tableSchema = GetData<string>(reader, "SchemaName");
+                        var tableName = GetData<string>(reader, "TableName");
+                        var indexName = GetData<string>(reader, "IndexName");
+                        var indexDisplayName = GetDisplayName(tableSchema, indexName);
+
+                        if ((table == null)
+                            || !table.SchemaName.Equals(tableSchema, StringComparison.OrdinalIgnoreCase)
+                            || !table.TableName.Equals(tableName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var tableDisplayName = GetDisplayName(tableSchema, tableName);
+                            if (!tables.TryGetValue(tableDisplayName, out table))
+                            {
+                                string errorMessage = string.Format(
+                                    CultureInfo.InvariantCulture,
+                                    "Could not find foreign key table \"{0}\" for index \"{1}\".",
+                                    tableDisplayName,
+                                    indexDisplayName);
+                                throw new ApplicationException(errorMessage);
+                            }
+
+                            indexes = new List<IIndex>();
+                            table.Indexes = indexes;
+                        }
+
+                        if ((index == null)
+                            || (!index.IndexSchema.Equals(tableSchema, StringComparison.OrdinalIgnoreCase))
+                            || (!index.IndexName.Equals(indexName, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            index = indexResolver.Resolve();
+                            indexes.Add(index);
+                            index.Table = table;
+                            index.IndexDisplayName = GetDisplayName(tableSchema, indexName);
+                            index.IndexSchema = tableSchema;
+                            index.IndexName = indexName;
+                            columns = new List<IColumn>();
+                            index.Columns = columns;
+                        }
+
+                        var columnName = GetData<string>(reader, "ColumnName");
+                        IColumn column = table.Columns.FirstOrDefault(c => c.Name == columnName);
+                        if (column == null)
+                        {
+                            var errorMessage = string.Format(
+                                CultureInfo.InvariantCulture,
+                                "Could not find indexed column \"{0}\" in table \"{1}\".",
+                                columnName,
+                                table.DisplayName);
+                            throw new ApplicationException(errorMessage);
+                        }
+
+                        index.IsPrimary = GetData<bool>(reader, "IsPrimaryKey");
+                        index.IsUniqueIndex = GetData<bool>(reader, "IsUniqueIndex");
+                        columns.Add(column);
+                    }
+
+                    return null;
+                });
+        }
+
+        /// <summary>
         /// Get routines like stored procedures and functions
         /// </summary>
+        /// <param name="result">data analysis result</param>
         /// <returns>routine dictionary</returns>
         protected IReadOnlyDictionary<string, IRoutine> GetRoutines(IDatabaseAnalysisResult result)
         {
@@ -345,6 +443,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                         routine.DisplayName = GetDisplayName(routine.SchemaName, routine.RoutineName);
                         routines.Add(routine.DisplayName, routine);
                     }
+
                     return routines;
                 });
 
@@ -375,6 +474,155 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
             return routineCollection;
         }
 
+        /// <summary>
+        /// Update routine parameters
+        /// </summary>
+        /// <param name="routines">routine collection</param>
+        protected void UpdateRoutineParameters(IReadOnlyDictionary<string, IRoutine> routines)
+        {
+            this.ExecuteReader<object>(
+                "GetRoutineParameters",
+                reader =>
+                {
+                    IRoutine routine = null;
+                    List<IParameter> parameters = null;
+                    var resolver = this.ResolverFactory.GetResolver<IParameter>();
+                    while (reader.Read())
+                    {
+                        var routineSchema = GetData<string>(reader, "ROUTINE_SCHEMA");
+                        var routineName = GetData<string>(reader, "ROUTINE_NAME");
+
+                        if ((routine == null)
+                            || !routine.SchemaName.Equals(routineSchema, StringComparison.OrdinalIgnoreCase)
+                            || !routine.RoutineName.Equals(routineName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var routineDisplayName = GetDisplayName(routineSchema, routineName);
+                            if (!routines.TryGetValue(routineDisplayName, out routine))
+                            {
+                                var errorMessage = string.Format(
+                                    CultureInfo.InvariantCulture,
+                                    "Could not found routine \"{0}\" while process parameters",
+                                    routineDisplayName);
+                                throw new ApplicationException(errorMessage);
+                            }
+
+                            parameters = new List<IParameter>();
+                            routine.Parameters = parameters;
+                        }
+
+                        var parameter = resolver.Resolve();
+                        parameter.ParameterName = GetData<string>(reader, "PARAMETER_NAME");
+                        parameter.Mode = GetData<string>(reader, "PARAMETER_MODE");
+                        parameter.DataTypeName = GetData<string>(reader, "DATA_TYPE");
+                        parameter.StringSize = GetData<int?>(reader, "CHARACTER_MAXIMUM_LENGTH");
+                        parameter.NumericPrecision = GetData<int?>(reader, "NUMERIC_PRECISION");
+                        parameter.NumericScale = GetData<int?>(reader, "NUMERIC_SCALE");
+                        parameters.Add(parameter);
+                    }
+
+                    return null;
+                });
+        }
+
+        /// <summary>
+        /// Update references
+        /// </summary>
+        /// <param name="result">database analysis result</param>
+        /// <param name="routines">routine collection</param>
+        protected void UpdateReferences(IDatabaseAnalysisResult result, IReadOnlyDictionary<string, IRoutine> routines)
+        {
+            var resolver = this.ResolverFactory.GetResolver<IReference>();
+
+            // process foreign key references
+            foreach (var table in result.Tables.Values)
+            {
+                if (!table.ForeignKeys.IsReadOnlyNullOrEmpty())
+                {
+                    foreach (var foreignKey in table.ForeignKeys)
+                    {
+                        var referencedTable = foreignKey.Table;
+                        if (referencedTable.References == null)
+                        {
+                            referencedTable.References = new SortedList<string, IReference>();
+                        }
+
+                        var reference = resolver.Resolve();
+                        reference.EntityDisplayName = table.DisplayName;
+                        reference.EntitySchema = table.SchemaName;
+                        reference.EntityName = table.TableName;
+                        reference.EntityType = TableTypeShortName;
+                        var referenceKey = GetReferenceKey(reference);
+                        referencedTable.References[referenceKey] = reference;
+                    }
+                }
+            }
+
+            // process cross entity references
+            this.ExecuteReader<object>(
+                "GetReferences",
+                reader =>
+                {
+                    while (reader.Read())
+                    {
+                        var referenceShema = GetData<string>(reader, "REFERENCE_ENTITY_SCHEMA");
+                        var referenceName = GetData<string>(reader, "REFERENCE_ENTITY_NAME");
+                        var referenceType = GetData<string>(reader, "REFERENCE_ENTITY_TYPE");
+                        var referenceDisplayName = GetDisplayName(referenceShema, referenceName);
+
+                        var reference = resolver.Resolve();
+                        reference.EntityDisplayName = GetDisplayName(referenceShema, referenceName);
+                        reference.EntitySchema = GetData<string>(reader, "REFERENCE_ENTITY_SCHEMA");
+                        reference.EntityName = GetData<string>(reader, "REFERENCE_ENTITY_NAME");
+                        reference.EntityType = GetData<string>(reader, "REFERENCE_ENTITY_TYPE");
+                        var referenceKey = GetReferenceKey(reference);
+
+                        switch (referenceType.ToUpperInvariant())
+                        {
+                            case TableTypeShortName:
+                                ITable table;
+                                if (result.Tables.IsReadOnlyNullOrEmpty() || !result.Tables.TryGetValue(referenceDisplayName, out table))
+                                {
+                                    var errorMessage = string.Format(
+                                        CultureInfo.InvariantCulture,
+                                        "Could not find table \"{0}\" while building reference for \"{1}\"",
+                                        referenceDisplayName,
+                                        reference.EntityDisplayName);
+                                    throw new ApplicationException(errorMessage);
+                                }
+
+                                if (table.References == null)
+                                {
+                                    table.References = new SortedList<string, IReference>();
+                                }
+
+                                table.References[referenceKey] = reference;
+                                break;
+                            case ProcedureTypeShortName:
+                            case FunctionTypeShortName:
+                                IRoutine routine;
+                                if (routines.IsReadOnlyNullOrEmpty() || !routines.TryGetValue(referenceDisplayName, out routine))
+                                {
+                                    var errorMessage = string.Format(
+                                        CultureInfo.InvariantCulture,
+                                        "Could not find routine \"{0}\" while building reference for \"{1}\"",
+                                        referenceDisplayName,
+                                        reference.EntityDisplayName);
+                                    throw new ApplicationException(errorMessage);
+                                }
+
+                                if (routine.References == null)
+                                {
+                                    routine.References = new SortedList<string, IReference>();
+                                }
+
+                                routine.References[referenceKey] = reference;
+                                break;
+                        }
+                    }
+
+                    return null;
+                });
+        }
 
         /// <summary>
         /// Get data from data reader
@@ -425,6 +673,21 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
         private static string GetDisplayName(string schemaName, string tableName)
         {
             return string.Format(CultureInfo.InvariantCulture, "[{0}].[{1}]", schemaName, tableName);
+        }
+
+        /// <summary>
+        /// Get reference key
+        /// </summary>
+        /// <param name="reference">reference instance</param>
+        /// <returns>reference key</returns>
+        private static string GetReferenceKey(IReference reference)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "{0}:{1}:{2}",
+                reference.EntityType,
+                reference.EntitySchema,
+                reference.EntityName).ToUpperInvariant();
         }
     }
 }

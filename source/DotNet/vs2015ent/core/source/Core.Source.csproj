@@ -98,6 +98,9 @@
     <Compile Include="..\..\..\shared\core\source\IDataType.cs">
       <Link>IDataType.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\shared\core\source\IIndex.cs">
+      <Link>IIndex.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\shared\core\source\ILogger.cs">
       <Link>ILogger.cs</Link>
     </Compile>
@@ -106,6 +109,12 @@
     </Compile>
     <Compile Include="..\..\..\shared\core\source\IObjectResolverFactory.cs">
       <Link>IObjectResolverFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\IParameter.cs">
+      <Link>IParameter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\IReference.cs">
+      <Link>IReference.cs</Link>
     </Compile>
     <Compile Include="..\..\..\shared\core\source\IRoutine.cs">
       <Link>IRoutine.cs</Link>

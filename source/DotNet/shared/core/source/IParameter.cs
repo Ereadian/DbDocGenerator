@@ -1,41 +1,30 @@
 ﻿//------------------------------------------------------------------------------------------------------------------------------------------ 
-// <copyright file="IRoutine.cs" company="Ereadian"> 
+// <copyright file="IParameter.cs" company="Ereadian"> 
 //     Copyright (c) Ereadian.  All rights reserved. 
 // </copyright> 
 //------------------------------------------------------------------------------------------------------------------------------------------ 
 
 namespace Ereadian.DatabaseDocumentGenerator.Core
 {
-    using System.Collections.Generic;
-
     /// <summary>
-    /// Routine interface
+    /// Routine parameter interface
     /// </summary>
-    public interface IRoutine
+    public interface IParameter
     {
         /// <summary>
-        /// Routine display name
+        /// Gets or sets the the routine the parameter belongs to
         /// </summary>
-        /// <example>[dbo].[spGetUser]</example>
-        string DisplayName { get; set; }
+        IRoutine Routine { get; set; }
 
         /// <summary>
-        /// Gets or sets Schema Name (for example, "DBO")
+        /// Gets or set the parameter name
         /// </summary>
-        string SchemaName { get; set; }
+        string ParameterName { get; set; }
 
         /// <summary>
-        /// Gets or sets Routine Name
+        /// Gets or set the parameter mode/direction
         /// </summary>
-        string RoutineName { get; set; }
-
-        /// <summary>
-        /// Gets or sets routine type
-        /// </summary>
-        /// <remarks>
-        /// It can be "PROCEDURE", "FUNCTION" and so on.
-        /// </remarks>
-        string RoutineType { get; set; }
+        string Mode { get; set; }
 
         /// <summary>
         /// Gets or sets name of column data type
@@ -58,21 +47,8 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         int? NumericScale { get; set; }
 
         /// <summary>
-        /// Gets or sets source code
+        /// Gets default column value
         /// </summary>
-        string SoruceCode { get; set; }
-
-        /// <summary>
-        /// Gets or sets parameters
-        /// </summary>
-        IReadOnlyList<IParameter> Parameters { get; set; }
-
-        /// <summary>
-        /// referenced by entities
-        /// </summary>
-        /// <remarks>
-        /// key is [type][schema][name]. for example, fn.dbo.fnGetUser.
-        /// </remarks>
-        SortedList<string, IReference> References { get; set; }
+        string DefaultValue { get; set; }
     }
 }

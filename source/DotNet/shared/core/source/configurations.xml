@@ -69,5 +69,64 @@
 	        FROM [INFORMATION_SCHEMA].[ROUTINES] 
       ]]>
     </command>
+    <command name="GetRoutineParameters">
+      <![CDATA[
+        SELECT 
+	        [SPECIFIC_SCHEMA] [ROUTINE_SCHEMA],
+	        [SPECIFIC_NAME] [ROUTINE_NAME],
+	        [PARAMETER_NAME],
+	        [PARAMETER_MODE],
+          [DATA_TYPE],
+	        [CHARACTER_MAXIMUM_LENGTH],
+	        [NUMERIC_PRECISION],
+	        [NUMERIC_SCALE]
+	        FROM [INFORMATION_SCHEMA].[PARAMETERS]
+        WHERE ([PARAMETER_NAME] IS NOT NULL) AND (LEN([PARAMETER_NAME])>0)
+        ORDER BY [SPECIFIC_SCHEMA], [SPECIFIC_NAME], [ORDINAL_POSITION]
+      ]]>
+    </command>
+    <command name="GetIndexes">
+      <![CDATA[
+        SELECT  OBJECT_SCHEMA_NAME(ind.object_id) AS SchemaName
+              , OBJECT_NAME(ind.object_id) AS TableName
+              , ind.name AS IndexName
+              , ind.is_primary_key AS IsPrimaryKey
+              , ind.is_unique AS IsUniqueIndex
+              , col.name AS ColumnName
+              , ic.is_included_column AS IsIncludedColumn
+              , ic.key_ordinal AS ColumnOrder
+        FROM    sys.indexes ind
+                INNER JOIN sys.index_columns ic
+                    ON ind.object_id = ic.object_id
+                       AND ind.index_id = ic.index_id
+                INNER JOIN sys.columns col
+                    ON ic.object_id = col.object_id
+                       AND ic.column_id = col.column_id
+                INNER JOIN sys.tables t
+                    ON ind.object_id = t.object_id
+        WHERE   t.is_ms_shipped = 0
+        ORDER BY OBJECT_SCHEMA_NAME(ind.object_id) --SchemaName
+              , OBJECT_NAME(ind.object_id) --ObjectName
+              , ind.is_primary_key DESC
+              , ind.is_unique DESC
+              , ind.name --IndexName
+              , ic.key_ordinal      
+      ]]>
+    </command>
+    <command name="GetReferences">
+      <![CDATA[
+        SELECT DISTINCT
+	        SCHEMA_NAME(REF.SCHEMA_ID) AS REFERENCE_ENTITY_SCHEMA,
+	        REF.[NAME] AS REFERENCE_ENTITY_NAME,
+	        REF.[TYPE] AS REFERENCE_ENTITY_TYPE,
+	        SCHEMA_NAME(REFBY.SCHEMA_ID) AS REFERENCEDBY_ENTITY_SCHEMA,
+	        REFBY.[NAME] AS REFERENCEDBY_ENTITY_NAME,
+	        REFBY.[TYPE] AS REFERENCEDBY_ENTITY_TYPE
+	        FROM SYSDEPENDS DEP
+	        INNER JOIN SYS.OBJECTS REF ON REF.[OBJECT_ID] = DEP.[DEPID]
+	        INNER JOIN SYS.OBJECTS REFBY ON REFBY.[OBJECT_ID] = DEP.[ID]
+	        ORDER BY REFERENCE_ENTITY_TYPE, REFERENCE_ENTITY_SCHEMA, REFERENCE_ENTITY_NAME
+      ]]>
+    </command>
   </provider>
 </configuration>
