@@ -76,10 +76,8 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Formater
                                    //params object[] parms)
                                    Tuple<string, int> token1,
                                    Tuple<string, int> token2,
-                                   Tuple<Tuple<string, int>,
-                                         Tuple<object, int>, bool> token3,
-                                   Tuple<Tuple<string, int>,
-                                         Tuple<string, int>, bool> token4)
+                                   Tuple<Tuple<string, int>,Tuple<string, int>, bool> token3,
+                                   Tuple<Tuple<string, int>,Tuple<object, int>, bool> token4)
         {
             //            WriteAttribute("href", 
             //                Tuple.Create(" href=\"", 395), 
@@ -94,7 +92,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Formater
                 value = string.Empty;
 
             if (token4 != null)
-                textval = token4.Item2.Item1;
+                textval = token4.Item2.Item1.ToString();
             else
                 textval = string.Empty;
 

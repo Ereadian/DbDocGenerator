@@ -134,7 +134,7 @@
                     </tr>
                     @foreach (var foreignKey in table.ForeignKeys)
                     {
-                        var tableDisplayName = foreignKey.Columns[0].Value.Table.DisplayName;
+                        string tableDisplayName = foreignKey.Columns[0].Value.Table.DisplayName;
                         <tr>
                             <td>@foreignKey.DisplayName</td>
                             <td>@foreignKey.Columns[0].Key.Name</td>
