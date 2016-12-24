@@ -1,0 +1,152 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>@Model.Title</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+        table th {
+            text-align: left;
+        }
+        table td, table td * {
+            vertical-align: top;
+        }
+        table, th, td {
+            border: 1px solid black;
+            padding: 3px;
+        } 
+    </style>
+</head>
+<body>
+    @{
+        ITable[] tables = null;
+        if (!Model.Tables.IsReadOnlyNullOrEmpty())
+        {
+            tables = Model.Tables.Values.OrderBy(t => t.DisplayName).ToArray();
+        }
+    }
+    <h1>@Model.Title</h1>
+    <h2>Table Of Content</h2>
+    <table>
+        <tr>
+        @if (tables != null)
+        {
+            <th>Tables</th>
+        }
+        @if (!Model.Functions.IsReadOnlyNullOrEmpty())
+        {
+            <th>Functions</th>
+        }
+        @if (!Model.StoredProcedures.IsReadOnlyNullOrEmpty())
+        {
+            <th>Stored Proceures</th>
+        }
+        </tr>
+        <tr>
+        @if (tables != null)
+        {
+            var list = Model.Tables.Values.OrderBy(t => t.DisplayName);
+            @:<td>
+            @foreach (var table in tables)
+            {
+                @:<div><a href="#@table.DisplayName">@table.DisplayName</a></div>
+            }
+            @:</td>
+        }
+
+        @if (Model.Functions.Count > 0)
+        {
+            var list = Model.Functions.Values.OrderBy(f => f.DisplayName);
+            @:<td>
+            @foreach (var func in list)
+            {
+                @:<div>@func.DisplayName</div>
+            }
+            @:</td>
+        }
+
+        @if (Model.StoredProcedures.Count > 0)
+        {
+            var list = Model.StoredProcedures.Values.OrderBy(p => p.DisplayName);
+            @:<td>
+            @foreach (var proc in list)
+            {
+                @:<div>@proc.DisplayName</div>
+            }
+            @:</td>
+        }
+        </tr>
+    </table>
+
+    @if (tables != null)
+    {
+        @:<h2>Tables</h2>
+        foreach (var table in tables)
+        {
+            <hr/>
+            <h3 id="@table.DisplayName">@table.DisplayName</h3>
+            <h4>Columns</h4>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Data Type</th>
+                </tr>
+                @foreach (var column in table.Columns)
+                {
+                    <tr>
+                        <td>@column.Name</td>
+                        <td>@column.GetDataTypeName()</td>
+                    </tr>
+                }
+            </table>
+
+            if (table.PrimaryKey != null)
+            {
+                <h4>Primary Key</h4>
+                <table>
+                    <tr>
+                        <th>Constraint Name</th>
+                        <td>@table.PrimaryKey.DisplayName</td>
+                    </tr>
+                    <tr>
+                        <th>Column(s)</th>
+                        <td>
+                            @foreach (var key in table.PrimaryKey.Columns)
+                            {
+                                <div>@key.Key.Name</div>
+                            }
+                        </td>
+                    </tr>
+                </table>
+            }
+
+            if (!table.ForeignKeys.IsReadOnlyNullOrEmpty())
+            {
+                <h4>Foreign Key</h4>
+                <table>
+                    <tr>
+                        <th>Constraint Name</th>
+                        <th>Foreign Key Column Name</th>
+                        <th>Primary Key Table</th>
+                        <th>Primary Key Column Name</th>
+                    </tr>
+                    @foreach (var foreignKey in table.ForeignKeys)
+                    {
+                        var tableDisplayName = foreignKey.Columns[0].Value.Table.DisplayName;
+                        <tr>
+                            <td>@foreignKey.DisplayName</td>
+                            <td>@foreignKey.Columns[0].Key.Name</td>
+                            <td><a href="#@tableDisplayName">@tableDisplayName</a></td>
+                            <td>@foreignKey.Columns[0].Value.Name</td>
+                        </tr>
+                    }
+                </table>
+            }
+        }
+    }
+
+
+</body>
+</html>

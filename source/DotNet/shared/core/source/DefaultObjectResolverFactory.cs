@@ -39,6 +39,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
             { typeof(ILogger), typeof(LogTrace) },
             { typeof(IDatabaseConfigurationProvider), typeof(DatabaseConfigurationProvider) },
             { typeof(IDatabaseAnalysisResult), null },
+            { typeof(IFormatter), typeof(Formater.HtmlFormatter) },
             { typeof(ITable), null },
             { typeof(IColumn), null },
             { typeof(IConstraint), null },

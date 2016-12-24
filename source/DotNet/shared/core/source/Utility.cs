@@ -11,6 +11,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
     using System.Reflection;
     using System.Reflection.Emit;
     using System.Text;
+    using System.Globalization;
 
     /// <summary>
     /// Utility functions
@@ -231,6 +232,29 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
             var constructorBuilder = Utility.CreateDefaultConstructor(typeBuilder, baseType, interfaceType);
             Utility.CreateProperties(typeBuilder, interfaceType);
             return typeBuilder.CreateType();
+        }
+
+        public static string GetDataTypeString(string name, int? stringSize, int? numericPrecision, int? numericScale)
+        {
+            var builder = new StringBuilder(name);
+            if (stringSize.HasValue)
+            {
+                if (stringSize < 0)
+                {
+                    builder.Append("(max)");
+                }
+                else
+                {
+                    builder.AppendFormat(CultureInfo.InvariantCulture, "({0})", stringSize.Value);
+                }
+            }
+
+            return builder.ToString();
+        }
+
+        public static string GetDataTypeName(this IColumn column)
+        {
+            return GetDataTypeString(column.DataTypeName, column.StringSize, column.NumericPrecision, column.NumericScale);
         }
     }
 }

@@ -14,17 +14,28 @@ namespace Ereadian.DatabaseDocumentGenerator.UI.ConsoleApplication
     using System.Configuration;
     using Core;
     using Core.SqlServer;
+    using System.IO;
 
     class Program
     {
         static void Main(string[] args)
         {
+            var title = ConfigurationManager.AppSettings["title"];
             var providerName = ConfigurationManager.AppSettings["provider"];
             var connectionString = ConfigurationManager.ConnectionStrings["default"].ConnectionString;
-            var configurationProvider = Singleton<ObjectResolverFactory>.Instance.GetResolver<IDatabaseConfigurationProvider>().Resolve();
+            var resolverFactory = Singleton<ObjectResolverFactory>.Instance;
+
+            var configurationProvider = resolverFactory.GetResolver<IDatabaseConfigurationProvider>().Resolve();
             var configuration = configurationProvider[providerName];
             var databaseOperation = new SqlServerDatabaseOperation(connectionString, configuration);
             var result = databaseOperation.Analyze();
+
+            var formatter = resolverFactory.GetResolver<IFormatter>().Resolve();
+            string filename = args.Length > 0 ? args[0] : "database.html";
+            using (var stream = new FileStream(filename, FileMode.Create))
+            {
+                formatter.Format(title, result, stream);
+            }
         }
     }
 }

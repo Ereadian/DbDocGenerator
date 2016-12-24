@@ -14,6 +14,11 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
     public interface IDatabaseAnalysisResult
     {
         /// <summary>
+        /// Gets or sets title
+        /// </summary>
+        string Title { get; set; }
+
+        /// <summary>
         /// Gets or sets tables
         /// </summary>
         IReadOnlyDictionary<string, ITable> Tables { get; set; }

@@ -33,6 +33,10 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -77,6 +81,12 @@
     <Compile Include="..\..\..\shared\core\source\Events.cs">
       <Link>Events.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\shared\core\source\Formatter\HtmlFormatter.cs">
+      <Link>Formater\HtmlFormatter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\Formatter\RazorTemplateBase.cs">
+      <Link>Formater\RazorTemplateBase.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\shared\core\source\IColumn.cs">
       <Link>IColumn.cs</Link>
     </Compile>
@@ -97,6 +107,9 @@
     </Compile>
     <Compile Include="..\..\..\shared\core\source\IDataType.cs">
       <Link>IDataType.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\shared\core\source\IFormatter.cs">
+      <Link>IFormatter.cs</Link>
     </Compile>
     <Compile Include="..\..\..\shared\core\source\IIndex.cs">
       <Link>IIndex.cs</Link>
@@ -156,7 +169,12 @@
       <Link>configurations.xml</Link>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\..\shared\core\source\Formatter\main.cshtml">
+      <Link>Formater\main.cshtml</Link>
+    </EmbeddedResource>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
