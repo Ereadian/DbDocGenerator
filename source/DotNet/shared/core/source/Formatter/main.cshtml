@@ -171,6 +171,37 @@
                     }
                 </table>
             }
+
+            if (!table.References.IsReadOnlyNullOrEmpty())
+            {
+                <h4>Reference</h4>
+                <table>
+                    <tr>
+                        <th>Type</th>
+                        <th>Name</th>
+                    </tr>
+                    @foreach (var reference in table.References.Values)
+                    {
+                        string type = null;
+                        switch (reference.EntityType.ToUpperInvariant())
+                        {
+                            case "U":
+                                type = "Table";
+                                break;
+                            case "P":
+                                type = "Stored Procedure";
+                                break;
+                            case "FN":
+                                type = "Function";
+                                break;
+                        }
+                        <tr>
+                            <td>@type</td>
+                            <td><a href="#@reference.EntityDisplayName">@reference.EntityDisplayName</a></td>
+                        </tr>
+                    }
+                </table>
+            }
         }
     }
 
