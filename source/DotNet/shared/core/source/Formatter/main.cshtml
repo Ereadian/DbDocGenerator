@@ -26,6 +26,11 @@
         {
             tables = Model.Tables.Values.OrderBy(t => t.DisplayName).ToArray();
         }
+        IRoutine[] functions = null;
+        if (!Model.Functions.IsReadOnlyNullOrEmpty())
+        {
+            functions = Model.Functions.Values.OrderBy(f => f.DisplayName).ToArray();
+        }
     }
     <h1>@Model.Title</h1>
     <h2>Table Of Content</h2>
@@ -35,7 +40,7 @@
         {
             <th>Tables</th>
         }
-        @if (!Model.Functions.IsReadOnlyNullOrEmpty())
+        @if (functions != null)
         {
             <th>Functions</th>
         }
@@ -47,7 +52,6 @@
         <tr>
         @if (tables != null)
         {
-            var list = Model.Tables.Values.OrderBy(t => t.DisplayName);
             @:<td>
             @foreach (var table in tables)
             {
@@ -56,11 +60,10 @@
             @:</td>
         }
 
-        @if (Model.Functions.Count > 0)
+        @if (functions != null)
         {
-            var list = Model.Functions.Values.OrderBy(f => f.DisplayName);
             @:<td>
-            @foreach (var func in list)
+            @foreach (var func in functions)
             {
                 @:<div>@func.DisplayName</div>
             }

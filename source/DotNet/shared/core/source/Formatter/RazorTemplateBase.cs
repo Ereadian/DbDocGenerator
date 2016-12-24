@@ -24,7 +24,10 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.Formater
 
         public virtual void Write(object value)
         {
-            WriteLiteral(value);
+            if (value != null)
+            {
+                WriteLiteral(value);
+            }
         }
 
         public virtual void WriteLiteral(object value)
