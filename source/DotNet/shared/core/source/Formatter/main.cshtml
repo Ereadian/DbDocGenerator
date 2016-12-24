@@ -144,6 +144,33 @@
                     }
                 </table>
             }
+
+            if (!table.Indexes.IsReadOnlyNullOrEmpty())
+            {
+                <h4>Indexes</h4>
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Columns</th>
+                        <th>IsPrimary</th>
+                        <th>IsUniqueIndex</th>
+                    </tr>
+                    @foreach (var index in table.Indexes)
+                    {
+                        <tr>
+                            <td>@index.IndexDisplayName</td>
+                            <td>
+                                @foreach (var column in index.Columns)
+                                {
+                                    <div>@column.Name</div>
+                                }
+                            </td>
+                            <td>@index.IsPrimary</td>
+                            <td>@index.IsUniqueIndex</td>
+                        </tr>
+                    }
+                </table>
+            }
         }
     }
 
