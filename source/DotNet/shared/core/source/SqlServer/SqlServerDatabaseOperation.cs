@@ -12,6 +12,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
     using System.Data.SqlClient;
     using System.Globalization;
     using System.Linq;
+    using System.Text;
 
     /// <summary>
     /// SQL server database operation
@@ -38,8 +39,9 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
         /// </summary>
         /// <param name="connectionString">connection string</param>
         /// <param name="configuration">database configuration</param>
-        public SqlServerDatabaseOperation(string connectionString, IDatabaseConfiguration configuration)
-            : base(connectionString, configuration)
+        /// <param name="sampleCount">count of sample data</param>
+        public SqlServerDatabaseOperation(string connectionString, IDatabaseConfiguration configuration, int sampleCount)
+            : base(connectionString, configuration, sampleCount)
         {
         }
 
@@ -92,10 +94,18 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
             this.UpdateTablePrimaryKeys(result.Tables);
             this.UpdateTableForeignKeys(result.Tables);
             this.UpdateIndexes(result.Tables);
+            if (result.Tables != null)
+            {
+                this.UpdateSampleData(result.Tables?.Values);
+            }
 
             //view
             result.Views = this.GetViews();
             this.UpdateViewColumnUsage(result);
+            if (result.Views != null)
+            {
+                this.UpdateSampleData(result.Views?.Values);
+            }
 
             // routines
             var routines = this.GetRoutines(result);
@@ -206,16 +216,16 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                         var tableSchema = GetData<string>(reader, "TABLE_SCHEMA");
                         var tableName = GetData<string>(reader, "TABLE_NAME");
 
-                        if ((view==null) 
-                            || !view.SchemaName.Equals(viewSchema, StringComparison.OrdinalIgnoreCase) 
+                        if ((view == null)
+                            || !view.SchemaName.Equals(viewSchema, StringComparison.OrdinalIgnoreCase)
                             || !view.Name.Equals(viewName, StringComparison.OrdinalIgnoreCase))
                         {
                             var viewDisplayName = GetDisplayName(viewSchema, viewName);
                             if ((result.Views == null) || !result.Views.TryGetValue(viewDisplayName, out view))
                             {
                                 var errorMessage = string.Format(
-                                    CultureInfo.InvariantCulture, 
-                                    "Could not found view \"{0}\" for usage updating", 
+                                    CultureInfo.InvariantCulture,
+                                    "Could not found view \"{0}\" for usage updating",
                                     viewDisplayName);
                                 throw new ApplicationException(errorMessage);
                             }
@@ -863,6 +873,84 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Update containers sample data
+        /// </summary>
+        /// <param name="containers">container collection</param>
+        private void UpdateSampleData(IEnumerable<IBaseContainer> containers)
+        {
+            if ((this.SampleCount > 0) && (containers != null))
+            {
+                foreach (var container in containers)
+                {
+                    this.UpdateSampleData(container);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Update sample code to container
+        /// </summary>
+        /// <param name="container">container instance</param>
+        /// <param name="sampleCount">sample count</param>
+        private void UpdateSampleData(IBaseContainer container)
+        {
+            var columns = container.Columns;
+            if (!columns.IsReadOnlyNullOrEmpty())
+            {
+                var builder = new StringBuilder();
+                builder.AppendFormat(
+                    CultureInfo.InvariantCulture,
+                    "SELECT TOP {0} ",
+                    this.SampleCount);
+                for (var i = 0; i < columns.Count; i++)
+                {
+                    if (i > 0)
+                    {
+                        builder.Append(", ");
+                    }
+
+                    builder.AppendFormat(CultureInfo.InvariantCulture, "[{0}]", columns[i].Name);
+                }
+
+                builder.AppendFormat(
+                    CultureInfo.InvariantCulture,
+                    " FROM {0}",
+                    container.DisplayName);
+
+                var data = this.Execute<IReadOnlyList<object[]>>(
+                    builder.ToString(),
+                    CommandType.Text,
+                    command =>
+                    {
+                        var list = new List<object[]>();
+                        using (var reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                var row = new object[columns.Count];
+                                for (var i = 0; i < columns.Count; i++)
+                                {
+                                    var value = reader[i];
+                                    if (value == DBNull.Value)
+                                    {
+                                        value = null;
+                                    }
+
+                                    row[i] = value;
+                                }
+
+                                list.Add(row);
+                            }
+                        }
+
+                        return list;
+                    });
+
+                container.SampleData = data;
+            }
         }
     }
 }

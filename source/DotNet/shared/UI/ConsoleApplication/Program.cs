@@ -22,12 +22,13 @@ namespace Ereadian.DatabaseDocumentGenerator.UI.ConsoleApplication
         {
             var title = ConfigurationManager.AppSettings["title"];
             var providerName = ConfigurationManager.AppSettings["provider"];
+            var sampleCount = int.Parse(ConfigurationManager.AppSettings["samples"]);
             var connectionString = ConfigurationManager.ConnectionStrings["default"].ConnectionString;
             var resolverFactory = Singleton<ObjectResolverFactory>.Instance;
 
             var configurationProvider = resolverFactory.GetResolver<IDatabaseConfigurationProvider>().Resolve();
             var configuration = configurationProvider[providerName];
-            var databaseOperation = new SqlServerDatabaseOperation(connectionString, configuration);
+            var databaseOperation = new SqlServerDatabaseOperation(connectionString, configuration, sampleCount);
             var result = databaseOperation.Analyze();
 
             var formatter = resolverFactory.GetResolver<IFormatter>().Resolve();

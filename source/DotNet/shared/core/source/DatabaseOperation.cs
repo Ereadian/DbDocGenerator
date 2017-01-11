@@ -20,10 +20,12 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// </summary>
         /// <param name="connectionString">connection string</param>
         /// <param name="configuration">database configuration</param>
-        public DatabaseOperation(string connectionString, IDatabaseConfiguration configuration)
+        /// <param name="sampleCount">count of sample data from table/view</param>
+        public DatabaseOperation(string connectionString, IDatabaseConfiguration configuration, int sampleCount)
         {
             this.ConnectionString = connectionString;
             this.Configuration = configuration;
+            this.SampleCount = sampleCount;
         }
 
         /// <summary>
@@ -35,6 +37,11 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// Gets database configuration
         /// </summary>
         protected IDatabaseConfiguration Configuration { get; private set; }
+
+        /// <summary>
+        /// Gets or set sample count
+        /// </summary>
+        protected int SampleCount { get; private set; }
 
         /// <summary>
         /// Create connections instance
@@ -104,14 +111,32 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <returns>return value</returns>
         public T Execute<T>(string commandName, Func<IDbCommand, T> func, IReadOnlyDictionary<string, object> parameters = null)
         {
+            return this.Execute<T>(
+                this.Configuration.GetCommand(commandName),
+                CommandType.Text,
+                func,
+                parameters);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T">type of return value</typeparam>
+        /// <param name="commandText">command text</param>
+        /// <param name="commandType">command type</param>
+        /// <param name="func">function for command</param>
+        /// <param name="parameters">command parameters</param>
+        /// <returns>return value</returns>
+        public T Execute<T>(string commandText, CommandType commandType, Func<IDbCommand, T> func, IReadOnlyDictionary<string, object> parameters = null)
+        {
             T value;
 
             using (var connection = this.CreateConnection())
             {
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = this.Configuration.GetCommand(commandName);
-                    command.CommandType = CommandType.Text;
+                    command.CommandText = commandText;
+                    command.CommandType = commandType;
 
                     if (!parameters.IsReadOnlyNullOrEmpty())
                     {

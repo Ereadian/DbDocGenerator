@@ -41,5 +41,10 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// key is [type][schema][name]. for example, fn.dbo.fnGetUser.
         /// </remarks>
         SortedList<string, IReference> References { get; set; }
+
+        /// <summary>
+        /// Gets or sets sample data
+        /// </summary>
+        IReadOnlyList<object[]> SampleData { get; set; }
     }
 }
