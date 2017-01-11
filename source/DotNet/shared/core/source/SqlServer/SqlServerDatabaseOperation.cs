@@ -885,7 +885,14 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
             {
                 foreach (var container in containers)
                 {
-                    this.UpdateSampleData(container);
+                    try
+                    {
+                        this.UpdateSampleData(container);
+                    }
+                    catch
+                    {
+                        //TODO Show error
+                    }
                 }
             }
         }
