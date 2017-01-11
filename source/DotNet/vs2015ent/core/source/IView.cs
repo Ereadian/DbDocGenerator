@@ -1,5 +1,5 @@
 ﻿//------------------------------------------------------------------------------------------------------------------------------------------ 
-// <copyright file="ITable.cs" company="Ereadian"> 
+// <copyright file="IView.cs" company="Ereadian"> 
 //     Copyright (c) Ereadian.  All rights reserved. 
 // </copyright> 
 //------------------------------------------------------------------------------------------------------------------------------------------ 
@@ -9,23 +9,13 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
     using System.Collections.Generic;
 
     /// <summary>
-    /// Table definition interface
+    /// View interface
     /// </summary>
-    public interface ITable : IBaseContainer
+    public interface IView : IBaseContainer
     {
         /// <summary>
-        /// Gets or sets primary key
+        /// Gets or sets view column usages
         /// </summary>
-        IConstraint PrimaryKey { get; set; }
-
-        /// <summary>
-        /// Gets or sets table indexes
-        /// </summary>
-        IReadOnlyList<IIndex> Indexes { get; set; }
-
-        /// <summary>
-        /// Gets or sets foreign keys
-        /// </summary>
-        IReadOnlyList<IConstraint> ForeignKeys { get; set; }
+        IReadOnlyList<IColumnUsage> ColumnUsages { get; set; }
     }
 }

@@ -7,6 +7,7 @@
 namespace Ereadian.DatabaseDocumentGenerator.Core
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using System.Reflection.Emit;
@@ -153,7 +154,8 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         public static void CreateProperties(TypeBuilder typeBuilder, Type interfaceType)
         {
             // build field for each property and implement these properties
-            var propertyInformationCollection = interfaceType.GetProperties();
+            var propertyInformationCollection = new HashSet<PropertyInfo>();
+            GetProperties(interfaceType, propertyInformationCollection);
             if (!propertyInformationCollection.IsNullOrEmpty())
             {
                 foreach (var propertyInformation in propertyInformationCollection)
@@ -255,6 +257,26 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         public static string GetDataTypeName(this IColumn column)
         {
             return GetDataTypeString(column.DataTypeName, column.StringSize, column.NumericPrecision, column.NumericScale);
+        }
+
+        private static void GetProperties(Type type, ISet<PropertyInfo> propertyInformationCollection)
+        {
+            var properties = type.GetProperties();
+            if (!properties.IsNullOrEmpty())
+            {
+                foreach (var property in properties)
+                {
+                    propertyInformationCollection.Add(property);
+                }
+            }
+            var baseInterfaces = type.GetInterfaces();
+            if (!baseInterfaces.IsNullOrEmpty())
+            {
+                foreach (var baseInterface in baseInterfaces)
+                {
+                    GetProperties(baseInterface, propertyInformationCollection);
+                }
+            }
         }
     }
 }

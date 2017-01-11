@@ -162,6 +162,9 @@
     <Compile Include="..\..\..\shared\core\source\Utility.cs">
       <Link>Utility.cs</Link>
     </Compile>
+    <Compile Include="IBaseContainer.cs" />
+    <Compile Include="IColumnUsage.cs" />
+    <Compile Include="IView.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

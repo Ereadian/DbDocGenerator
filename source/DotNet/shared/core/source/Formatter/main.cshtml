@@ -26,11 +26,19 @@
         {
             tables = Model.Tables.Values.OrderBy(t => t.DisplayName).ToArray();
         }
+
+        IView[] views = null;
+        if (!Model.Views.IsReadOnlyNullOrEmpty())
+        {
+            views = Model.Views.Values.OrderBy(t => t.DisplayName).ToArray();
+        }
+
         IRoutine[] functions = null;
         if (!Model.Functions.IsReadOnlyNullOrEmpty())
         {
             functions = Model.Functions.Values.OrderBy(f => f.DisplayName).ToArray();
         }
+
         IRoutine[] procedures = null;
         if (!Model.StoredProcedures.IsReadOnlyNullOrEmpty())
         {
@@ -45,6 +53,10 @@
         {
             <th>Tables (@tables.Length)</th>
         }
+        @if (views != null)
+        {
+            <th>Views (@views.Length)</th>
+        }
         @if (functions != null)
         {
             var cnt = functions.Length;
@@ -52,7 +64,7 @@
         }
         @if (procedures != null)
         {
-            <th>Stored Proceures (@procedures.Length))</th>
+            <th>Stored Proceures (@procedures.Length)</th>
         }
         </tr>
         <tr>
@@ -64,6 +76,16 @@
                 @:<div><a href="#@table.DisplayName">@table.DisplayName</a></div>
             }
             @:</td>
+        }
+
+        @if (tables != null)
+        {
+            @:<td>
+            @foreach (var view in views)
+            {
+                @:<div><a href="#@view.DisplayName">@view.DisplayName</a></div>
+            }
+           @:</td>
         }
 
         @if (functions != null)
@@ -201,6 +223,67 @@
                                 break;
                             case "FN":
                                 type = "Function";
+                                break;
+                            default:
+                                type = reference.EntityType;
+                                break;
+                        }
+                        <tr>
+                            <td>@type</td>
+                            <td><a href="#@reference.EntityDisplayName">@reference.EntityDisplayName</a></td>
+                        </tr>
+                                }
+                </table>
+            }
+                        }
+                    }
+
+    @if (views != null)
+    {
+        @:<h2>Views</h2>
+        foreach (var view in views)
+        {
+            <hr />
+            <h3 id="@view.DisplayName">@view.DisplayName</h3>
+            <h4>Columns</h4>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Data Type</th>
+                </tr>
+                @foreach (var column in view.Columns)
+                {
+                    <tr>
+                        <td>@column.Name</td>
+                        <td>@column.GetDataTypeName()</td>
+                    </tr>
+                }
+            </table>
+
+            if (!view.References.IsReadOnlyNullOrEmpty())
+            {
+                <h4>Reference</h4>
+                <table>
+                    <tr>
+                        <th>Type</th>
+                        <th>Name</th>
+                    </tr>
+                    @foreach (var reference in view.References.Values)
+                    {
+                        string type = null;
+                        switch (reference.EntityType.ToUpperInvariant())
+                        {
+                            case "U":
+                                type = "Table";
+                                break;
+                            case "P":
+                                type = "Stored Procedure";
+                                break;
+                            case "FN":
+                                type = "Function";
+                                break;
+                            default:
+                                type = reference.EntityType;
                                 break;
                         }
                         <tr>

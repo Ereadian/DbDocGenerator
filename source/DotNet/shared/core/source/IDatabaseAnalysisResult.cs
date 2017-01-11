@@ -24,6 +24,11 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         IReadOnlyDictionary<string, ITable> Tables { get; set; }
 
         /// <summary>
+        /// Gets or sets views
+        /// </summary>
+        IReadOnlyDictionary<string, IView> Views { get; set; }
+
+        /// <summary>
         /// Gets or sets stored procedures
         /// </summary>
         IReadOnlyDictionary<string, IRoutine> StoredProcedures { get; set; }

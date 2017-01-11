@@ -41,12 +41,14 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
             { typeof(IDatabaseAnalysisResult), null },
             { typeof(IFormatter), typeof(Formater.HtmlFormatter) },
             { typeof(ITable), null },
+            { typeof(IView), null },
             { typeof(IColumn), null },
             { typeof(IConstraint), null },
             { typeof(IRoutine), null },
             { typeof(IParameter), null },
             { typeof(IIndex), null },
-            { typeof(IReference), null }
+            { typeof(IReference), null },
+            { typeof(IColumnUsage), null }
         };
 
         /// <summary>

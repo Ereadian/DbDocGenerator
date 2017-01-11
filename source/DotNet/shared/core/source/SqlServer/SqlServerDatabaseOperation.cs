@@ -85,11 +85,19 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
         public override IDatabaseAnalysisResult Analyze()
         {
             var result = this.ResolverFactory.GetResolver<IDatabaseAnalysisResult>().Resolve();
+
+            // table
             result.Tables = this.GetTables();
-            this.UpdateColumns(result.Tables);
+            this.UpdateTableColumns(result.Tables);
             this.UpdateTablePrimaryKeys(result.Tables);
             this.UpdateTableForeignKeys(result.Tables);
             this.UpdateIndexes(result.Tables);
+
+            //view
+            result.Views = this.GetViews();
+            this.UpdateViewColumnUsage(result);
+
+            // routines
             var routines = this.GetRoutines(result);
             this.UpdateRoutineParameters(routines);
             this.UpdateReferences(result, routines);
@@ -113,8 +121,8 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                     {
                         var table = tableResolver.Resolve();
                         table.SchemaName = reader["TABLE_SCHEMA"] as string;
-                        table.TableName = reader["TABLE_NAME"] as string;
-                        table.DisplayName = GetDisplayName(table.SchemaName, table.TableName);
+                        table.Name = reader["TABLE_NAME"] as string;
+                        table.DisplayName = GetDisplayName(table.SchemaName, table.Name);
                         tables.Add(table.DisplayName, table);
                     }
 
@@ -123,10 +131,146 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
         }
 
         /// <summary>
+        /// Get tables
+        /// </summary>
+        /// <returns>table collection</returns>
+        protected IReadOnlyDictionary<string, IView> GetViews()
+        {
+            return this.ExecuteReader(
+                "GetViews",
+                reader =>
+                {
+                    var views = new Dictionary<string, IView>(StringComparer.OrdinalIgnoreCase);
+                    var viewResolver = this.ResolverFactory.GetResolver<IView>();
+                    var columnResolver = this.ResolverFactory.GetResolver<IColumn>();
+                    IView view = null;
+                    List<IColumn> columns = null;
+                    while (reader.Read())
+                    {
+                        var viewSchema = GetData<string>(reader, "TABLE_SCHEMA");
+                        var viewName = GetData<string>(reader, "TABLE_NAME");
+                        var columnName = GetData<string>(reader, "COLUMN_NAME");
+
+                        if ((view == null)
+                            || !view.SchemaName.Equals(viewSchema, StringComparison.OrdinalIgnoreCase)
+                            || !view.Name.Equals(viewName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var viewDisplayName = GetDisplayName(viewSchema, viewName);
+                            if (views.TryGetValue(viewDisplayName, out view))
+                            {
+                                columns = view.Columns as List<IColumn>;
+                            }
+                            else
+                            {
+                                view = viewResolver.Resolve();
+                                view.DisplayName = viewDisplayName;
+                                view.SchemaName = viewSchema;
+                                view.Name = viewName;
+                                views.Add(viewDisplayName, view);
+                                columns = new List<IColumn>();
+                                view.Columns = columns;
+                            }
+                        }
+
+                        var column = columnResolver.Resolve();
+                        column.Table = view;
+                        column.Name = columnName;
+                        column.DataTypeName = GetData<string>(reader, "DATA_TYPE");
+                        column.StringSize = GetData<int?>(reader, "CHARACTER_MAXIMUM_LENGTH");
+                        column.NumericPrecision = GetData<int?>(reader, "NUMERIC_PRECISION");
+                        column.NumericScale = GetData<int?>(reader, "NUMERIC_SCALE");
+                        column.IsNullable = GetData<string>(reader, "IS_NULLABLE").Equals("YES", StringComparison.OrdinalIgnoreCase);
+                        column.DefaultValue = GetData<string>(reader, "COLUMN_DEFAULT");
+                        columns.Add(column);
+                    }
+
+                    return views;
+                });
+        }
+
+        protected void UpdateViewColumnUsage(IDatabaseAnalysisResult result)
+        {
+            this.ExecuteReader<object>(
+                "GetViewColumnUsage",
+                reader =>
+                {
+                    var usageResolver = this.ResolverFactory.GetResolver<IColumnUsage>();
+                    var referenceResolver = this.ResolverFactory.GetResolver<IReference>();
+                    var containerNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    IView view = null;
+                    List<IColumnUsage> usages = null;
+                    while (reader.Read())
+                    {
+                        var viewSchema = GetData<string>(reader, "VIEW_SCHEMA");
+                        var viewName = GetData<string>(reader, "VIEW_NAME");
+                        var columnName = GetData<string>(reader, "COLUMN_NAME");
+                        var tableSchema = GetData<string>(reader, "TABLE_SCHEMA");
+                        var tableName = GetData<string>(reader, "TABLE_NAME");
+
+                        if ((view==null) 
+                            || !view.SchemaName.Equals(viewSchema, StringComparison.OrdinalIgnoreCase) 
+                            || !view.Name.Equals(viewName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var viewDisplayName = GetDisplayName(viewSchema, viewName);
+                            if ((result.Views == null) || !result.Views.TryGetValue(viewDisplayName, out view))
+                            {
+                                var errorMessage = string.Format(
+                                    CultureInfo.InvariantCulture, 
+                                    "Could not found view \"{0}\" for usage updating", 
+                                    viewDisplayName);
+                                throw new ApplicationException(errorMessage);
+                            }
+
+                            containerNames.Clear();
+                            usages = new List<IColumnUsage>();
+                            view.ColumnUsages = usages;
+                        }
+
+                        var containerDisplayName = GetDisplayName(tableSchema, tableName);
+                        var container = GetContainer(result, containerDisplayName);
+                        if (container == null)
+                        {
+                            var errorMessage = string.Format(
+                                CultureInfo.InvariantCulture,
+                                "Could not found container \"{0}\" during usage updating for view \"{1}\"",
+                                containerDisplayName,
+                                view.DisplayName);
+                            throw new ApplicationException(errorMessage);
+                        }
+
+                        var usage = usageResolver.Resolve();
+                        usage.Container = container;
+                        usage.ViewColumn = view.Columns.FirstOrDefault(c => c.Name.Equals(columnName, StringComparison.OrdinalIgnoreCase));
+                        usages.Add(usage);
+
+                        if (!containerNames.Contains(containerDisplayName))
+                        {
+                            var reference = referenceResolver.Resolve();
+                            reference.EntityDisplayName = view.DisplayName;
+                            reference.EntitySchema = view.SchemaName;
+                            reference.EntityName = view.Name;
+                            reference.EntityType = "View";
+                            var referenceKey = GetReferenceKey(reference);
+                            if (container.References == null)
+                            {
+                                container.References = new SortedList<string, IReference>(StringComparer.OrdinalIgnoreCase);
+                            }
+
+                            container.References[referenceKey] = reference;
+
+                            containerNames.Add(containerDisplayName);
+                        }
+                    }
+
+                    return null;
+                });
+        }
+
+        /// <summary>
         /// Update table by add columns
         /// </summary>
         /// <param name="tables">table collection</param>
-        protected void UpdateColumns(IReadOnlyDictionary<string, ITable> tables)
+        protected void UpdateTableColumns(IReadOnlyDictionary<string, ITable> tables)
         {
             this.ExecuteReader<object>(
                 "GetColumns",
@@ -143,7 +287,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
 
                         if ((table == null)
                             || !table.SchemaName.Equals(tableSchema, StringComparison.OrdinalIgnoreCase)
-                            || !table.TableName.Equals(tableName, StringComparison.OrdinalIgnoreCase))
+                            || !table.Name.Equals(tableName, StringComparison.OrdinalIgnoreCase))
                         {
                             var tableDisplayName = GetDisplayName(tableSchema, tableName);
                             if (!tables.TryGetValue(tableDisplayName, out table))
@@ -200,7 +344,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
 
                         if ((table == null)
                             || !table.SchemaName.Equals(tableSchema, StringComparison.OrdinalIgnoreCase)
-                            || !table.TableName.Equals(tableName, StringComparison.OrdinalIgnoreCase))
+                            || !table.Name.Equals(tableName, StringComparison.OrdinalIgnoreCase))
                         {
                             var tableDisplayName = GetDisplayName(tableSchema, tableName);
                             if (!tables.TryGetValue(tableDisplayName, out table))
@@ -265,7 +409,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
 
                         if ((foreignKeyTable == null)
                             || !foreignKeyTable.SchemaName.Equals(foreignKeyTableSchema, StringComparison.OrdinalIgnoreCase)
-                            || !foreignKeyTable.TableName.Equals(foreignKeyTableName, StringComparison.OrdinalIgnoreCase))
+                            || !foreignKeyTable.Name.Equals(foreignKeyTableName, StringComparison.OrdinalIgnoreCase))
                         {
                             var tableDisplayName = GetDisplayName(foreignKeyTableSchema, foreignKeyTableName);
                             if (!tables.TryGetValue(tableDisplayName, out foreignKeyTable))
@@ -364,7 +508,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
 
                         if ((table == null)
                             || !table.SchemaName.Equals(tableSchema, StringComparison.OrdinalIgnoreCase)
-                            || !table.TableName.Equals(tableName, StringComparison.OrdinalIgnoreCase))
+                            || !table.Name.Equals(tableName, StringComparison.OrdinalIgnoreCase))
                         {
                             var tableDisplayName = GetDisplayName(tableSchema, tableName);
                             if (!tables.TryGetValue(tableDisplayName, out table))
@@ -549,7 +693,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                         var reference = resolver.Resolve();
                         reference.EntityDisplayName = table.DisplayName;
                         reference.EntitySchema = table.SchemaName;
-                        reference.EntityName = table.TableName;
+                        reference.EntityName = table.Name;
                         reference.EntityType = TableTypeShortName;
                         var referenceKey = GetReferenceKey(reference);
                         referencedTable.References[referenceKey] = reference;
@@ -688,6 +832,29 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                 reference.EntityType,
                 reference.EntitySchema,
                 reference.EntityName).ToUpperInvariant();
+        }
+
+        /// <summary>
+        /// Get table or view by display name
+        /// </summary>
+        /// <param name="result">analysis result</param>
+        /// <param name="displayName">display name</param>
+        /// <returns>table or view if found</returns>
+        private static IBaseContainer GetContainer(IDatabaseAnalysisResult result, string displayName)
+        {
+            ITable table;
+            if ((result.Tables != null) && result.Tables.TryGetValue(displayName, out table))
+            {
+                return table;
+            }
+
+            IView view;
+            if ((result.Views != null) && result.Views.TryGetValue(displayName, out view))
+            {
+                return view;
+            }
+
+            return null;
         }
     }
 }

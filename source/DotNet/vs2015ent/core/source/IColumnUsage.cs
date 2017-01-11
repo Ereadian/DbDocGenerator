@@ -1,31 +1,24 @@
 ﻿//------------------------------------------------------------------------------------------------------------------------------------------ 
-// <copyright file="ITable.cs" company="Ereadian"> 
+// <copyright file="IView.cs" company="Ereadian"> 
 //     Copyright (c) Ereadian.  All rights reserved. 
 // </copyright> 
 //------------------------------------------------------------------------------------------------------------------------------------------ 
 
 namespace Ereadian.DatabaseDocumentGenerator.Core
 {
-    using System.Collections.Generic;
-
     /// <summary>
-    /// Table definition interface
+    /// View column usage
     /// </summary>
-    public interface ITable : IBaseContainer
+    public interface IColumnUsage
     {
         /// <summary>
-        /// Gets or sets primary key
+        /// View column
         /// </summary>
-        IConstraint PrimaryKey { get; set; }
+        IColumn ViewColumn { get; set; }
 
         /// <summary>
-        /// Gets or sets table indexes
+        /// Container
         /// </summary>
-        IReadOnlyList<IIndex> Indexes { get; set; }
-
-        /// <summary>
-        /// Gets or sets foreign keys
-        /// </summary>
-        IReadOnlyList<IConstraint> ForeignKeys { get; set; }
+        IBaseContainer Container { get; set; }
     }
 }
