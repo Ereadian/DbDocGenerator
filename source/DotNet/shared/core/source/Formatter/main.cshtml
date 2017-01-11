@@ -347,6 +347,40 @@
                     }
                 </table>
             }
+
+            @if (!view.SampleData.IsReadOnlyNullOrEmpty())
+            {
+                <h4>Sample Data</h4>
+                var start = 0;
+                var columns = view.Columns;
+                var data = view.SampleData;
+                while (start < columns.Count)
+                {
+                    <table>
+                        <tr>
+                            <th></th>
+                            @for (var i = 0; (i < maxWidth) && (start + i < columns.Count); i++)
+                            {
+                                <th>@columns[start + i].Name</th>
+                            }
+                        </tr>
+                        @for (var j = 0; j < data.Count; j++)
+                        {
+                            <tr>
+                                <td>@j</td>
+                                @for (var i = 0; (i < maxWidth) && (start + i < columns.Count); i++)
+                                {
+                                    var item = data[j][i] ?? string.Empty;
+                                    <th>@item</th>
+                                }
+                            </tr>
+                        }
+                    </table>
+                    @{
+                        start += maxWidth;
+                    }
+                }
+            }
         }
     }
 
