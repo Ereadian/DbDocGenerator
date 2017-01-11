@@ -164,7 +164,7 @@
                     </tr>
                     @foreach (var foreignKey in table.ForeignKeys)
                     {
-                        string tableDisplayName = foreignKey.Columns[0].Value.Table.DisplayName;
+                        string tableDisplayName = foreignKey.Columns[0].Value.Container.DisplayName;
                         <tr>
                             <td>@foreignKey.DisplayName</td>
                             <td>@foreignKey.Columns[0].Key.Name</td>
@@ -260,6 +260,24 @@
                 }
             </table>
 
+            if (!view.ExternalColumns.IsReadOnlyNullOrEmpty())
+            {
+                <h4>Columm Usages</h4>
+                <table>
+                    <tr>
+                        <th>Table</th>
+                        <th>Column</th>
+                    </tr>
+                    @foreach (var column in view.ExternalColumns)
+                    {
+                        <tr>
+                            <td><a href="#@column.Container.DisplayName">@column.Container.DisplayName</a></td>
+                            <td>@column.Name</td>
+                        </tr>
+                    }
+                </table>
+            }
+
             if (!view.References.IsReadOnlyNullOrEmpty())
             {
                 <h4>Reference</h4>
@@ -295,7 +313,6 @@
             }
         }
     }
-
 
 </body>
 </html>

@@ -14,7 +14,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <summary>
         /// Gets or sets table which the column belongs to
         /// </summary>
-        IBaseContainer Table { get; set; }
+        IBaseContainer Container { get; set; }
 
         /// <summary>
         /// Gets or sets column name

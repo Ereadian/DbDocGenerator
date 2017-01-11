@@ -173,7 +173,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                         }
 
                         var column = columnResolver.Resolve();
-                        column.Table = view;
+                        column.Container = view;
                         column.Name = columnName;
                         column.DataTypeName = GetData<string>(reader, "DATA_TYPE");
                         column.StringSize = GetData<int?>(reader, "CHARACTER_MAXIMUM_LENGTH");
@@ -194,11 +194,10 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                 "GetViewColumnUsage",
                 reader =>
                 {
-                    var usageResolver = this.ResolverFactory.GetResolver<IColumnUsage>();
                     var referenceResolver = this.ResolverFactory.GetResolver<IReference>();
                     var containerNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                     IView view = null;
-                    List<IColumnUsage> usages = null;
+                    List<IColumn> externalColumns = null;
                     while (reader.Read())
                     {
                         var viewSchema = GetData<string>(reader, "VIEW_SCHEMA");
@@ -222,8 +221,8 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                             }
 
                             containerNames.Clear();
-                            usages = new List<IColumnUsage>();
-                            view.ColumnUsages = usages;
+                            externalColumns = new List<IColumn>();
+                            view.ExternalColumns = externalColumns;
                         }
 
                         var containerDisplayName = GetDisplayName(tableSchema, tableName);
@@ -238,10 +237,19 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                             throw new ApplicationException(errorMessage);
                         }
 
-                        var usage = usageResolver.Resolve();
-                        usage.Container = container;
-                        usage.ViewColumn = view.Columns.FirstOrDefault(c => c.Name.Equals(columnName, StringComparison.OrdinalIgnoreCase));
-                        usages.Add(usage);
+                        var externalColumn = container.Columns.FirstOrDefault(c => c.Name.Equals(columnName, StringComparison.OrdinalIgnoreCase));
+                        if (externalColumn == null)
+                        {
+                            var errorMessage = string.Format(
+                                CultureInfo.InvariantCulture,
+                                "Could not found column \"{0}\" in container \"{1}\" during usage updating for view \"{2}\"",
+                                columnName,
+                                containerDisplayName,
+                                view.DisplayName);
+                            throw new ApplicationException(errorMessage);
+                        }
+
+                        externalColumns.Add(externalColumn);
 
                         if (!containerNames.Contains(containerDisplayName))
                         {
@@ -305,7 +313,7 @@ namespace Ereadian.DatabaseDocumentGenerator.Core.SqlServer
                         }
 
                         var column = columnResolver.Resolve();
-                        column.Table = table;
+                        column.Container = table;
                         column.Name = columnName;
                         column.DataTypeName = GetData<string>(reader, "DATA_TYPE");
                         column.StringSize = GetData<int?>(reader, "CHARACTER_MAXIMUM_LENGTH");

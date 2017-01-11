@@ -16,6 +16,6 @@ namespace Ereadian.DatabaseDocumentGenerator.Core
         /// <summary>
         /// Gets or sets view column usages
         /// </summary>
-        IReadOnlyList<IColumnUsage> ColumnUsages { get; set; }
+        IReadOnlyList<IColumn> ExternalColumns { get; set; }
     }
 }
